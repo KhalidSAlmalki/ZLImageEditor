@@ -32,7 +32,8 @@ protocol ZLTextStickerViewDelegate: ZLStickerViewDelegate {
     
 }
 
-class ZLTextStickerView: UIView, ZLStickerViewAdditional {
+class ZLTextStickerView: UIView,
+                         ZLStickerViewAdditional {
 
     static let edgeInset: CGFloat = 20
     
@@ -60,16 +61,16 @@ class ZLTextStickerView: UIView, ZLStickerViewAdditional {
         }
     }
     
-    var textColor: UIColor {
+    var textColor: String {
         didSet {
-            label.textColor = textColor
+            label.textColor = textColor.colorWithHexString()
         }
     }
     
     // TODO: add text background color
-    var bgColor: UIColor {
+    var bgColor: UIColor? {
         didSet {
-            label.backgroundColor = bgColor
+            label.backgroundColor = bgColor ?? .clear
         }
     }
     
@@ -97,7 +98,15 @@ class ZLTextStickerView: UIView, ZLStickerViewAdditional {
     
     // Conver all states to model.
     var state: ZLTextStickerState {
-        return ZLTextStickerState(text: self.text, textColor: self.textColor, bgColor: self.bgColor, originScale: self.originScale, originAngle: self.originAngle, originFrame: self.originFrame, gesScale: self.gesScale, gesRotation: self.gesRotation, totalTranslationPoint: self.totalTranslationPoint)
+        return ZLTextStickerState(text: self.text,
+                                  textColor: self.textColor,
+                                  bgColor: self.bgColor?.toHexString(),
+                                  originScale: self.originScale,
+                                  originAngle: self.originAngle,
+                                  originFrame: self.originFrame,
+                                  gesScale: self.gesScale,
+                                  gesRotation: self.gesRotation,
+                                  totalTranslationPoint: self.totalTranslationPoint)
     }
     
     deinit {
@@ -105,14 +114,32 @@ class ZLTextStickerView: UIView, ZLStickerViewAdditional {
     }
     
     convenience init(from state: ZLTextStickerState) {
-        self.init(text: state.text, textColor: state.textColor, bgColor: state.bgColor, originScale: state.originScale, originAngle: state.originAngle, originFrame: state.originFrame, gesScale: state.gesScale, gesRotation: state.gesRotation, totalTranslationPoint: state.totalTranslationPoint, showBorder: false)
+        self.init(text: state.text,
+                  textColor: state.textColor,
+                  bgColor: state.bgColor,
+                  originScale: state.originScale,
+                  originAngle: state.originAngle,
+                  originFrame: state.originFrame,
+                  gesScale: state.gesScale,
+                  gesRotation: state.gesRotation,
+                  totalTranslationPoint: state.totalTranslationPoint,
+                  showBorder: false)
     }
     
-    init(text: String, textColor: UIColor, bgColor: UIColor, originScale: CGFloat, originAngle: CGFloat, originFrame: CGRect, gesScale: CGFloat = 1, gesRotation: CGFloat = 0, totalTranslationPoint: CGPoint = .zero, showBorder: Bool = true) {
+    init(text: String,
+         textColor: String,
+         bgColor: String?,
+         originScale: CGFloat,
+         originAngle: CGFloat,
+         originFrame: CGRect,
+         gesScale: CGFloat = 1,
+         gesRotation: CGFloat = 0,
+         totalTranslationPoint: CGPoint = .zero,
+         showBorder: Bool = true) {
         self.originScale = originScale
         self.text = text
         self.textColor = textColor
-        self.bgColor = bgColor
+        self.bgColor = bgColor?.colorWithHexString() ?? .clear
         self.originAngle = originAngle
         self.originFrame = originFrame
         
@@ -133,8 +160,8 @@ class ZLTextStickerView: UIView, ZLStickerViewAdditional {
         self.label = UILabel()
         self.label.text = text
         self.label.font = UIFont.boldSystemFont(ofSize: ZLTextStickerView.fontSize)
-        self.label.textColor = textColor
-        self.label.backgroundColor = bgColor
+        self.label.textColor = textColor.colorWithHexString()
+        self.label.backgroundColor = bgColor?.colorWithHexString() ?? .clear
         self.label.numberOfLines = 0
         self.label.lineBreakMode = .byCharWrapping
         self.borderView.addSubview(self.label)
@@ -201,14 +228,22 @@ class ZLTextStickerView: UIView, ZLStickerViewAdditional {
     
     @objc func tapAction(_ ges: UITapGestureRecognizer) {
         guard self.gesIsEnabled else { return }
-        
-        if let t = self.timer, t.isValid {
-            self.delegate?.sticker(self, editText: self.text)
-        } else {
-            self.superview?.bringSubviewToFront(self)
-            self.delegate?.stickerDidTap(self)
-            self.startTimer()
-        }
+        self.isHidden = true
+        self.superview?.bringSubviewToFront(self)
+        self.delegate?.sticker(self, editText: self.text)
+
+//        if let t = self.timer, t.isValid {
+//            self.isHidden = true
+//            self.delegate?.sticker(self, editText: self.text)
+//        } else {
+//            self.superview?.bringSubviewToFront(self)
+//            self.delegate?.stickerDidTap(self)
+//            self.startTimer()
+//        }
+    }
+    
+    func bringToFront() {
+        self.superview?.bringSubviewToFront(self)
     }
     
     @objc func pinchAction(_ ges: UIPinchGestureRecognizer) {
@@ -272,7 +307,7 @@ class ZLTextStickerView: UIView, ZLStickerViewAdditional {
         if isOn, !self.onOperation {
             self.onOperation = true
             self.cleanTimer()
-            self.borderView.layer.borderColor = UIColor.white.cgColor
+            self.borderView.layer.borderColor = UIColor.clear.cgColor
             self.superview?.bringSubviewToFront(self)
             self.delegate?.stickerBeginOperation(self)
         } else if !isOn, self.onOperation {
@@ -310,8 +345,9 @@ class ZLTextStickerView: UIView, ZLStickerViewAdditional {
     
     func startTimer() {
         self.cleanTimer()
-        self.borderView.layer.borderColor = UIColor.white.cgColor
-        self.timer = Timer.scheduledTimer(timeInterval: 2, target: self, selector: #selector(hideBorder), userInfo: nil, repeats: false) 
+        self.isHidden = false
+        self.borderView.layer.borderColor = UIColor.clear.cgColor
+        self.timer = Timer.scheduledTimer(timeInterval: 2, target: self, selector: #selector(hideBorder), userInfo: nil, repeats: false)
         RunLoop.current.add(self.timer!, forMode: .default)
     }
     
@@ -429,12 +465,11 @@ extension ZLTextStickerView: UIGestureRecognizerDelegate {
     
 }
 
-
-public class ZLTextStickerState: NSObject {
+public class ZLTextStickerState: Codable {
     
     let text: String
-    let textColor: UIColor
-    let bgColor: UIColor
+    let textColor: String
+    let bgColor: String?
     let originScale: CGFloat
     let originAngle: CGFloat
     let originFrame: CGRect
@@ -442,7 +477,15 @@ public class ZLTextStickerState: NSObject {
     let gesRotation: CGFloat
     let totalTranslationPoint: CGPoint
     
-    init(text: String, textColor: UIColor, bgColor: UIColor, originScale: CGFloat, originAngle: CGFloat, originFrame: CGRect, gesScale: CGFloat, gesRotation: CGFloat, totalTranslationPoint: CGPoint) {
+    init(text: String,
+         textColor: String,
+         bgColor: String?,
+         originScale: CGFloat,
+         originAngle: CGFloat,
+         originFrame: CGRect,
+         gesScale: CGFloat,
+         gesRotation: CGFloat,
+         totalTranslationPoint: CGPoint) {
         self.text = text
         self.textColor = textColor
         self.bgColor = bgColor
@@ -452,7 +495,5 @@ public class ZLTextStickerState: NSObject {
         self.gesScale = gesScale
         self.gesRotation = gesRotation
         self.totalTranslationPoint = totalTranslationPoint
-        super.init()
     }
-    
 }

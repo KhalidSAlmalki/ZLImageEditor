@@ -43,7 +43,10 @@ public class ZLImageEditorConfiguration: NSObject {
         }
     }
     
-    private var pri_tools: [ZLImageEditorConfiguration.EditTool] = [.draw, .clip, .imageSticker, .textSticker, .mosaic, .filter, .adjust]
+    private var pri_tools: [ZLImageEditorConfiguration.EditTool] = [.colorPicker,
+                                                                    .imagePicker,
+                                                                    .imageSticker,
+                                                                    .textSticker]
     /// Edit image tools. (Default order is draw, clip, imageSticker, textSticker, mosaic, filtter)
     /// Because Objective-C Array can't contain Enum styles, so this property is not available in Objective-C.
     /// - warning: If you want to use the image sticker feature, you must provide a view that implements ZLImageStickerContainerDelegate.
@@ -60,12 +63,18 @@ public class ZLImageEditorConfiguration: NSObject {
         }
     }
     
-    private var pri_drawColors: [UIColor] = [.white, .black, zlRGB(241, 79, 79), zlRGB(243, 170, 78), zlRGB(80, 169, 56), zlRGB(30, 183, 243), zlRGB(139, 105, 234)]
+    private var pri_drawColors: [UIColor] = [.white,
+                                             .red,
+                                             zlRGB(241, 79, 79),
+                                             zlRGB(243, 170, 78),
+                                             zlRGB(80, 169, 56),
+                                             zlRGB(30, 183, 243),
+                                             zlRGB(139, 105, 234)]
     /// Draw colors for image editor.
     @objc public var drawColors: [UIColor] {
         get {
             if pri_drawColors.isEmpty {
-                return [.white, .black, zlRGB(241, 79, 79), zlRGB(243, 170, 78), zlRGB(80, 169, 56), zlRGB(30, 183, 243), zlRGB(139, 105, 234)]
+                return [.white, .red, zlRGB(241, 79, 79), zlRGB(243, 170, 78), zlRGB(80, 169, 56), zlRGB(30, 183, 243), zlRGB(139, 105, 234)]
             } else {
                 return pri_drawColors
             }
@@ -77,7 +86,8 @@ public class ZLImageEditorConfiguration: NSObject {
     
     /// The default draw color. If this color not in editImageDrawColors, will pick the first color in editImageDrawColors as the default.
     @objc public var defaultDrawColor = zlRGB(241, 79, 79)
-    
+    @objc public var defaultBackgroundColor: UIColor = .red
+
     private var pri_clipRatios: [ZLImageClipRatio] = [.custom]
     /// Edit ratios for image editor.
     @objc public var clipRatios: [ZLImageClipRatio] {
@@ -93,7 +103,13 @@ public class ZLImageEditorConfiguration: NSObject {
         }
     }
     
-    private var pri_textStickerTextColors: [UIColor] = [.white, .black, zlRGB(241, 79, 79), zlRGB(243, 170, 78), zlRGB(80, 169, 56), zlRGB(30, 183, 243), zlRGB(139, 105, 234)]
+    private var pri_textStickerTextColors: [UIColor] = [.white,
+                                                        .black,
+                                                        zlRGB(241, 79, 79),
+                                                        zlRGB(243, 170, 78),
+                                                        zlRGB(80, 169, 56),
+                                                        zlRGB(30, 183, 243),
+                                                        zlRGB(139, 105, 234)]
     /// Text sticker colors for image editor.
     @objc public var textStickerTextColors: [UIColor] {
         get {
@@ -220,6 +236,8 @@ extension ZLImageEditorConfiguration {
         case mosaic
         case filter
         case adjust
+        case imagePicker
+        case colorPicker
     }
     
     @objc public enum AdjustTool: Int {
@@ -332,10 +350,20 @@ extension ZLImageClipRatio {
 
 @objc public protocol ZLImageStickerContainerDelegate where Self: UIView {
     
-    @objc var selectImageBlock: ( (UIImage) -> Void )? { get set }
+    @objc var selectImageBlock: ((ImageStickerData) -> Void )? { get set }
     
     @objc var hideBlock: ( () -> Void )? { get set }
     
     @objc func show(in view: UIView)
     
+}
+
+public class ImageStickerData: NSObject {
+    let image: UIImage
+    let name: String
+    
+   public init(image: UIImage, name: String) {
+        self.image = image
+        self.name = name
+    }
 }

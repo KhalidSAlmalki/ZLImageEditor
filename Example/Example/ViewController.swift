@@ -39,7 +39,19 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.setupUI()
+       self.setupUI()
+        ZLImageEditorConfiguration.default()
+            // Provide a image sticker container view
+            .imageStickerContainerView(ImageStickerContainerView())
+            // Custom filter
+//            .filters = [.normal]
+        
+        ZLEditImageViewController.showEditImageVC(parentVC: self,
+                                                  image: UIImage.imageWithColor(tintColor: .clear),
+                                                  editModel:  self.resultImageEditModel) { [weak self] (resImage, editModel) in
+            self?.resultImageEditModel = editModel
+
+        }
     }
     
     func setupUI() {
@@ -310,3 +322,18 @@ extension ViewController: UIImagePickerControllerDelegate, UINavigationControlle
     }
     
 }
+extension UIImage {
+   static func imageWithColor(tintColor: UIColor) -> UIImage {
+       let rect = CGRect(x: 0,
+                         y: 0,
+                         width: UIScreen.main.bounds.width,
+                         height:  UIScreen.main.bounds.width)
+        UIGraphicsBeginImageContextWithOptions(rect.size, false, 0)
+        tintColor.setFill()
+        UIRectFill(rect)
+        let image: UIImage = UIGraphicsGetImageFromCurrentImageContext()!
+        UIGraphicsEndImageContext()
+        return image
+    }
+}
+

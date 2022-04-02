@@ -58,7 +58,7 @@ protocol ZLStickerViewAdditional: NSObject {
 
 class ZLImageStickerView: UIView, ZLStickerViewAdditional {
 
-    static let edgeInset: CGFloat = 20
+    static let edgeInset: CGFloat = 0
     
     static let borderWidth = 1 / UIScreen.main.scale
     
@@ -76,7 +76,7 @@ class ZLImageStickerView: UIView, ZLStickerViewAdditional {
     
     var originTransform: CGAffineTransform = .identity
     
-    let image: UIImage
+    let image: ImageStickerData
     
     var pinchGes: UIPinchGestureRecognizer!
     
@@ -100,7 +100,13 @@ class ZLImageStickerView: UIView, ZLStickerViewAdditional {
     
     // Conver all states to model.
     var state: ZLImageStickerState {
-        return ZLImageStickerState(image: self.image, originScale: self.originScale, originAngle: self.originAngle, originFrame: self.originFrame, gesScale: self.gesScale, gesRotation: self.gesRotation, totalTranslationPoint: self.totalTranslationPoint)
+        return ZLImageStickerState(imageName: self.image.name,
+                                   originScale: self.originScale,
+                                   originAngle: self.originAngle,
+                                   originFrame: self.originFrame,
+                                   gesScale: self.gesScale,
+                                   gesRotation: self.gesRotation,
+                                   totalTranslationPoint: self.totalTranslationPoint)
     }
     
     deinit {
@@ -108,10 +114,15 @@ class ZLImageStickerView: UIView, ZLStickerViewAdditional {
     }
     
     convenience init(from state: ZLImageStickerState) {
-        self.init(image: state.image, originScale: state.originScale, originAngle: state.originAngle, originFrame: state.originFrame, gesScale: state.gesScale, gesRotation: state.gesRotation, totalTranslationPoint: state.totalTranslationPoint, showBorder: false)
+        self.init(image: ImageStickerData(image: UIImage(named: state.imageName)!,
+                                          name: state.imageName),
+                  originScale: state.originScale,
+                  originAngle: state.originAngle,
+                  originFrame: state.originFrame, gesScale: state.gesScale, gesRotation: state.gesRotation, totalTranslationPoint: state.totalTranslationPoint, showBorder: false)
     }
     
-    init(image: UIImage, originScale: CGFloat, originAngle: CGFloat, originFrame: CGRect, gesScale: CGFloat = 1, gesRotation: CGFloat = 0, totalTranslationPoint: CGPoint = .zero, showBorder: Bool = true) {
+    init(image: ImageStickerData,
+         originScale: CGFloat, originAngle: CGFloat, originFrame: CGRect, gesScale: CGFloat = 1, gesRotation: CGFloat = 0, totalTranslationPoint: CGPoint = .zero, showBorder: Bool = true) {
         self.image = image
         self.originScale = originScale
         self.originAngle = originAngle
@@ -129,7 +140,7 @@ class ZLImageStickerView: UIView, ZLStickerViewAdditional {
             self.startTimer()
         }
         
-        self.imageView = UIImageView(image: image)
+        self.imageView = UIImageView(image: image.image)
         self.imageView.contentMode = .scaleAspectFit
         self.imageView.clipsToBounds = true
         self.addSubview(self.imageView)
@@ -262,7 +273,7 @@ class ZLImageStickerView: UIView, ZLStickerViewAdditional {
         if isOn, !self.onOperation {
             self.onOperation = true
             self.cleanTimer()
-            self.layer.borderColor = UIColor.white.cgColor
+            self.layer.borderColor = UIColor.clear.cgColor
             self.superview?.bringSubviewToFront(self)
             self.delegate?.stickerBeginOperation(self)
         } else if !isOn, self.onOperation {
@@ -300,7 +311,7 @@ class ZLImageStickerView: UIView, ZLStickerViewAdditional {
     
     func startTimer() {
         self.cleanTimer()
-        self.layer.borderColor = UIColor.white.cgColor
+        self.layer.borderColor = UIColor.clear.cgColor
         self.timer = Timer.scheduledTimer(timeInterval: 2, target: self, selector: #selector(hideBorder), userInfo: nil, repeats: false)
         RunLoop.current.add(self.timer!, forMode: .default)
     }
@@ -396,10 +407,10 @@ extension ZLImageStickerView: UIGestureRecognizerDelegate {
     
 }
 
-
-public class ZLImageStickerState: NSObject {
+public class ZLImageStickerState: NSObject,
+                                  Codable {
     
-    let image: UIImage
+    var imageName: String
     let originScale: CGFloat
     let originAngle: CGFloat
     let originFrame: CGRect
@@ -407,8 +418,24 @@ public class ZLImageStickerState: NSObject {
     let gesRotation: CGFloat
     let totalTranslationPoint: CGPoint
     
-    init(image: UIImage, originScale: CGFloat, originAngle: CGFloat, originFrame: CGRect, gesScale: CGFloat, gesRotation: CGFloat, totalTranslationPoint: CGPoint) {
-        self.image = image
+    enum CodingKeys: String, CodingKey {
+        case originScale
+        case originAngle
+        case originFrame
+        case gesScale
+        case gesRotation
+        case totalTranslationPoint
+        case imageName
+    }
+    
+    init(imageName: String,
+         originScale: CGFloat,
+         originAngle: CGFloat,
+         originFrame: CGRect,
+         gesScale: CGFloat,
+         gesRotation: CGFloat,
+         totalTranslationPoint: CGPoint) {
+        self.imageName = imageName
         self.originScale = originScale
         self.originAngle = originAngle
         self.originFrame = originFrame

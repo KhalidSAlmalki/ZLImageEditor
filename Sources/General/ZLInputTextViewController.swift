@@ -45,7 +45,7 @@ class ZLInputTextViewController: UIViewController {
     var currentTextColor: UIColor
     
     /// text, textColor, bgColor
-    var endInput: ( (String, UIColor, UIColor) -> Void )?
+    var endInput: ( (String, String, String?) -> Void )?
     
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
         return .portrait
@@ -55,11 +55,15 @@ class ZLInputTextViewController: UIViewController {
         return true
     }
     
-    init(image: UIImage?, text: String? = nil, textColor: UIColor? = nil, bgColor: UIColor? = nil) {
+    init(image: UIImage?,
+         text: String? = nil,
+         textColor: String? = nil,
+         bgColor: String? = nil) {
+        
         self.image = image
         self.text = text ?? ""
-        if let _ = textColor {
-            self.currentTextColor = textColor!
+        if let textColor = textColor {
+            self.currentTextColor = textColor.colorWithHexString()
         } else {
             if !ZLImageEditorConfiguration.default().textStickerTextColors.contains(ZLImageEditorConfiguration.default().textStickerDefaultTextColor) {
                 self.currentTextColor = ZLImageEditorConfiguration.default().textStickerTextColors.first!
@@ -67,6 +71,7 @@ class ZLInputTextViewController: UIViewController {
                 self.currentTextColor = ZLImageEditorConfiguration.default().textStickerDefaultTextColor
             }
         }
+        
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -79,7 +84,10 @@ class ZLInputTextViewController: UIViewController {
 
         self.setupUI()
         
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIApplication.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(keyboardWillShow(_:)),
+                                               name: UIApplication.keyboardWillShowNotification,
+                                               object: nil)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -102,7 +110,12 @@ class ZLInputTextViewController: UIViewController {
         let doneBtnW = localLanguageTextValue(.done).boundingRect(font: ZLImageEditorLayout.bottomToolTitleFont, limitSize: CGSize(width: .greatestFiniteMagnitude, height: ZLImageEditorLayout.bottomToolBtnH)).width + 20
         self.doneBtn.frame = CGRect(x: view.bounds.width - 20 - doneBtnW, y: btnY, width: doneBtnW, height: ZLImageEditorLayout.bottomToolBtnH)
         
-        self.textView.frame = CGRect(x: 20, y: cancelBtn.frame.maxY + 20, width: view.bounds.width - 40, height: 150)
+        self.textView.frame = CGRect(x: 20,
+                                     y: cancelBtn.frame.maxY + 20,
+                                     width: view.bounds.width,
+                                     height: 150)
+        
+        self.textView.center = self.view.center
         
         if let index = ZLImageEditorConfiguration.default().textStickerTextColors.firstIndex(where: { $0 == self.currentTextColor}) {
             self.collectionView.scrollToItem(at: IndexPath(row: index, section: 0), at: .centeredHorizontally, animated: false)
@@ -141,6 +154,7 @@ class ZLInputTextViewController: UIViewController {
         self.textView.backgroundColor = .clear
         self.textView.tintColor = ZLImageEditorConfiguration.default().editDoneBtnBgColor
         self.textView.textColor = self.currentTextColor
+        self.textView.tintColor = self.currentTextColor
         self.textView.text = self.text
         self.textView.font = UIFont.boldSystemFont(ofSize: ZLTextStickerView.fontSize)
         view.addSubview(self.textView)
@@ -162,11 +176,15 @@ class ZLInputTextViewController: UIViewController {
     }
     
     @objc func cancelBtnClick() {
+        self.endInput?(self.textView.text,
+                       self.currentTextColor.toHexString(), nil)
         self.dismiss(animated: true, completion: nil)
     }
     
     @objc func doneBtnClick() {
-        self.endInput?(self.textView.text, self.currentTextColor, .clear)
+        self.endInput?(self.textView.text,
+                       self.currentTextColor.toHexString(),
+                       nil)
         self.dismiss(animated: true, completion: nil)
     }
     
@@ -194,18 +212,14 @@ extension ZLInputTextViewController: UICollectionViewDelegate, UICollectionViewD
         
         let c = ZLImageEditorConfiguration.default().textStickerTextColors[indexPath.row]
         cell.color = c
-        if c == self.currentTextColor {
-            cell.bgWhiteView.layer.transform = CATransform3DMakeScale(1.2, 1.2, 1)
-        } else {
-            cell.bgWhiteView.layer.transform = CATransform3DIdentity
-        }
-        
+ 
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         self.currentTextColor = ZLImageEditorConfiguration.default().textStickerTextColors[indexPath.row]
         self.textView.textColor = self.currentTextColor
+        self.textView.tintColor =  self.currentTextColor
         collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
         collectionView.reloadData()
     }
@@ -221,6 +235,7 @@ extension ZLInputTextViewController: UITextViewDelegate {
             self.doneBtnClick()
             return false
         }
+        textView.sizeToFit()
         return true
     }
     

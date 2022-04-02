@@ -36,12 +36,6 @@ class ZLEditToolCell: UICollectionViewCell {
             case .clip:
                 icon.image = getImage("zl_clip")
                 icon.highlightedImage = getImage("zl_clip")
-            case .imageSticker:
-                icon.image = getImage("zl_imageSticker")
-                icon.highlightedImage = getImage("zl_imageSticker")
-            case .textSticker:
-                icon.image = getImage("zl_textSticker")
-                icon.highlightedImage = getImage("zl_textSticker")
             case .mosaic:
                 icon.image = getImage("zl_mosaic")
                 icon.highlightedImage = getImage("zl_mosaic_selected")
@@ -51,6 +45,18 @@ class ZLEditToolCell: UICollectionViewCell {
             case .adjust:
                 icon.image = getImage("zl_adjust")
                 icon.highlightedImage = getImage("zl_adjust_selected")
+            case .imageSticker:
+                icon.image = UIImage(systemName: "face.smiling")
+                icon.highlightedImage = UIImage(systemName: "face.smiling")
+            case .textSticker:
+                icon.image = UIImage(systemName: "character.textbox")
+                icon.highlightedImage = UIImage(systemName: "character.textbox")
+            case .imagePicker:
+                icon.image = UIImage(systemName: "photo")
+                icon.highlightedImage = UIImage(systemName: "photo")
+            case .colorPicker:
+                icon.image = UIImage(systemName: "paintpalette")
+                icon.highlightedImage = UIImage(systemName: "paintpalette")
             }
         }
     }
@@ -73,10 +79,9 @@ class ZLEditToolCell: UICollectionViewCell {
 // MARK: draw color cell
 class ZLDrawColorCell: UICollectionViewCell {
     
-    var bgWhiteView: UIView!
+    private var bgWhiteView: UIView!
     
     var colorView: UIView!
-    
     var color: UIColor! {
         didSet {
             self.colorView.backgroundColor = color
@@ -86,18 +91,18 @@ class ZLDrawColorCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        self.bgWhiteView = UIView()
-        self.bgWhiteView.backgroundColor = .white
-        self.bgWhiteView.layer.cornerRadius = 10
-        self.bgWhiteView.layer.masksToBounds = true
-        self.bgWhiteView.frame = CGRect(x: 0, y: 0, width: 20, height: 20)
-        self.bgWhiteView.center = CGPoint(x: self.bounds.midX, y: self.bounds.midY)
-        self.contentView.addSubview(self.bgWhiteView)
+//        self.bgWhiteView = UIView()
+//        self.bgWhiteView.backgroundColor = .white
+//        self.bgWhiteView.layer.cornerRadius = 10
+//        self.bgWhiteView.layer.masksToBounds = true
+//        self.bgWhiteView.frame = CGRect(x: 0, y: 0, width: self.frame.width, height: self.frame.height)
+//        self.bgWhiteView.center = CGPoint(x: self.bounds.midX, y: self.bounds.midY)
+//        self.contentView.addSubview(self.bgWhiteView)
         
         self.colorView = UIView()
-        self.colorView.layer.cornerRadius = 8
+        self.colorView.layer.cornerRadius = self.frame.width/2
         self.colorView.layer.masksToBounds = true
-        self.colorView.frame = CGRect(x: 0, y: 0, width: 16, height: 16)
+        self.colorView.frame = CGRect(x: 0, y: 0, width: self.frame.width, height: self.frame.height)
         self.colorView.center = CGPoint(x: self.bounds.midX, y: self.bounds.midY)
         self.contentView.addSubview(self.colorView)
     }

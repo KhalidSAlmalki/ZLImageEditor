@@ -26,59 +26,6 @@
 
 import UIKit
 
-public class ZLEditImageModel: NSObject {
-    
-    public let drawPaths: [ZLDrawPath]
-    
-    public let mosaicPaths: [ZLMosaicPath]
-    
-    public let editRect: CGRect?
-    
-    public let angle: CGFloat
-    
-    public let brightness: Float
-    
-    public let contrast: Float
-    
-    public let saturation: Float
-    
-    public let selectRatio: ZLImageClipRatio?
-    
-    public let selectFilter: ZLFilter?
-    
-    public let textStickers: [(state: ZLTextStickerState, index: Int)]?
-    
-    public let imageStickers: [(state: ZLImageStickerState, index: Int)]?
-    
-    public init(
-        drawPaths: [ZLDrawPath],
-        mosaicPaths: [ZLMosaicPath],
-        editRect: CGRect?,
-        angle: CGFloat,
-        brightness: Float,
-        contrast: Float,
-        saturation: Float,
-        selectRatio: ZLImageClipRatio?,
-        selectFilter: ZLFilter,
-        textStickers: [(state: ZLTextStickerState, index: Int)]?,
-        imageStickers: [(state: ZLImageStickerState, index: Int)]?
-    ) {
-        self.drawPaths = drawPaths
-        self.mosaicPaths = mosaicPaths
-        self.editRect = editRect
-        self.angle = angle
-        self.brightness = brightness
-        self.contrast = contrast
-        self.saturation = saturation
-        self.selectRatio = selectRatio
-        self.selectFilter = selectFilter
-        self.textStickers = textStickers
-        self.imageStickers = imageStickers
-        super.init()
-    }
-    
-}
-
 public class ZLEditImageViewController: UIViewController {
 
     static let drawColViewH: CGFloat = 50
@@ -142,9 +89,7 @@ public class ZLEditImageViewController: UIViewController {
     var bottomShadowView: UIView!
     
     var bottomShadowLayer: CAGradientLayer!
-    
-    var doneBtn: UIButton!
-    
+        
     var revokeBtn: UIButton!
     
     var selectedTool: ZLImageEditorConfiguration.EditTool?
@@ -159,6 +104,8 @@ public class ZLEditImageViewController: UIViewController {
     
     var adjustCollectionView: UICollectionView?
     
+    var textColorsCollectionView: UICollectionView!
+
     var adjustSlider: ZLAdjustSlider?
     
     var ashbinView: UIView!
@@ -167,6 +114,9 @@ public class ZLEditImageViewController: UIViewController {
     
     let drawColors: [UIColor]
     
+    let backgroundColors: [UIColor]
+    var currentBackgroundColor: UIColor = ZLImageEditorConfiguration.default().defaultBackgroundColor
+
     var currentDrawColor = ZLImageEditorConfiguration.default().defaultDrawColor
     
     var drawPaths: [ZLDrawPath]
@@ -223,7 +173,11 @@ public class ZLEditImageViewController: UIViewController {
         zl_debugPrint("ZLEditImageViewController deinit")
     }
     
-    @objc public class func showEditImageVC(parentVC: UIViewController?, animate: Bool = true, image: UIImage, editModel: ZLEditImageModel? = nil, completion: ( (UIImage, ZLEditImageModel) -> Void )? ) {
+    @objc public class func showEditImageVC(parentVC: UIViewController?,
+                                            animate: Bool = true,
+                                            image: UIImage,
+                                            editModel: ZLEditImageModel? = nil,
+                                            completion: ( (UIImage, ZLEditImageModel) -> Void )? ) {
         let tools = ZLImageEditorConfiguration.default().tools
         if ZLImageEditorConfiguration.default().showClipDirectlyIfOnlyHasClipTool, tools.count == 1, tools.contains(.clip) {
             let vc = ZLClipImageViewController(image: image, editRect: editModel?.editRect, angle: editModel?.angle ?? 0, selectRatio: editModel?.selectRatio)
@@ -245,12 +199,15 @@ public class ZLEditImageViewController: UIViewController {
         }
     }
     
-    @objc init(image: UIImage, editModel: ZLEditImageModel? = nil) {
+    @objc init(image: UIImage,
+               editModel: ZLEditImageModel? = nil) {
+        
         originalImage = image.fixOrientation()
         editImage = originalImage
         editImageWithoutAdjust = originalImage
         editRect = editModel?.editRect ?? CGRect(origin: .zero, size: image.size)
         drawColors = ZLImageEditorConfiguration.default().drawColors
+        backgroundColors = drawColors
         currentFilter = editModel?.selectFilter ?? .normal
         drawPaths = editModel?.drawPaths ?? []
         mosaicPaths = editModel?.mosaicPaths ?? []
@@ -274,17 +231,21 @@ public class ZLEditImageViewController: UIViewController {
             self.currentDrawColor = self.drawColors.first!
         }
         
+        self.currentBackgroundColor = self.backgroundColors.first!
+        
         let teStic = editModel?.textStickers ?? []
         let imStic = editModel?.imageStickers ?? []
         
-        var stickers: [UIView?] = Array(repeating: nil, count: teStic.count + imStic.count)
+        var stickers: [UIView?] = []
+        
         teStic.forEach { (cache) in
-            let v = ZLTextStickerView(from: cache.state)
-            stickers[cache.index] = v
+            let v = ZLTextStickerView(from: cache)
+            stickers.append(v)
         }
+        
         imStic.forEach { (cache) in
-            let v = ZLImageStickerView(from: cache.state)
-            stickers[cache.index] = v
+            let v = ZLImageStickerView(from: cache)
+            stickers.append(v)
         }
         
         self.stickers = stickers.compactMap { $0 }
@@ -324,10 +285,16 @@ public class ZLEditImageViewController: UIViewController {
         self.topShadowLayer.frame = self.topShadowView.bounds
         self.cancelBtn.frame = CGRect(x: 30, y: insets.top + 10, width: 28, height: 28)
         
-        self.bottomShadowView.frame = CGRect(x: 0, y: self.view.frame.height - 140 - insets.bottom, width: self.view.frame.width, height: 140 + insets.bottom)
+        self.bottomShadowView.frame = CGRect(x: 0,
+                                             y: self.view.frame.height - 140 - insets.bottom,
+                                             width: self.view.frame.width,
+                                             height: 140 + insets.bottom)
         self.bottomShadowLayer.frame = self.bottomShadowView.bounds
         
         self.drawColorCollectionView?.frame = CGRect(x: 20, y: 20, width: self.view.frame.width - 80, height: ZLEditImageViewController.drawColViewH)
+        
+        self.textColorsCollectionView?.frame = CGRect(x: 0, y: 30, width: self.view.frame.width, height: 35)
+
         self.revokeBtn.frame = CGRect(x: self.view.frame.width - 15 - 35, y: 30, width: 35, height: 30)
         
         self.adjustCollectionView?.frame = CGRect(x: 20, y: 10, width: view.frame.width - 40, height: ZLEditImageViewController.adjustColViewH)
@@ -337,11 +304,12 @@ public class ZLEditImageViewController: UIViewController {
         
         let toolY: CGFloat = 85
         
-        let doneBtnH = ZLImageEditorLayout.bottomToolBtnH
-        let doneBtnW = localLanguageTextValue(.editFinish).boundingRect(font: ZLImageEditorLayout.bottomToolTitleFont, limitSize: CGSize(width: CGFloat.greatestFiniteMagnitude, height: doneBtnH)).width + 20
-        self.doneBtn.frame = CGRect(x: self.view.frame.width-20-doneBtnW, y: toolY-2, width: doneBtnW, height: doneBtnH)
         
-        self.editToolCollectionView.frame = CGRect(x: 20, y: toolY, width: self.view.bounds.width - 20 - 20 - doneBtnW - 20, height: 30)
+        self.editToolCollectionView.frame = CGRect(x: 0,
+                                                   y: toolY,
+                                                   width: self.view.bounds.width,
+                                                   height: 50)
+        self.editToolCollectionView.frame.origin.x = self.view.center.x-(CGFloat((self.tools.count*60))/2)
         
         if !self.drawPaths.isEmpty {
             self.drawLine()
@@ -385,7 +353,9 @@ public class ZLEditImageViewController: UIViewController {
     func resetContainerViewFrame() {
         self.scrollView.setZoomScale(1, animated: true)
         self.imageView.image = self.editImage
-        
+        self.imageView.layer.cornerRadius = 20
+        self.imageView.clipsToBounds = true
+
         let editSize = self.editRect.size
         let scrollViewSize = self.scrollView.frame.size
         let ratio = min(scrollViewSize.width / editSize.width, scrollViewSize.height / editSize.height)
@@ -432,7 +402,7 @@ public class ZLEditImageViewController: UIViewController {
         self.imageView = UIImageView(image: self.originalImage)
         self.imageView.contentMode = .scaleAspectFit
         self.imageView.clipsToBounds = true
-        self.imageView.backgroundColor = .black
+        self.imageView.backgroundColor = currentBackgroundColor
         self.containerView.addSubview(self.imageView)
         
         self.drawingImageView = UIImageView()
@@ -469,7 +439,7 @@ public class ZLEditImageViewController: UIViewController {
         self.bottomShadowView.layer.addSublayer(self.bottomShadowLayer)
         
         let editToolLayout = UICollectionViewFlowLayout()
-        editToolLayout.itemSize = CGSize(width: 30, height: 30)
+        editToolLayout.itemSize = CGSize(width: 42, height: 36)
         editToolLayout.minimumLineSpacing = 20
         editToolLayout.minimumInteritemSpacing = 20
         editToolLayout.scrollDirection = .horizontal
@@ -480,16 +450,24 @@ public class ZLEditImageViewController: UIViewController {
         self.editToolCollectionView.showsHorizontalScrollIndicator = false
         self.bottomShadowView.addSubview(self.editToolCollectionView)
         
+        let colorToolLayout = UICollectionViewFlowLayout()
+            colorToolLayout.itemSize = CGSize(width: 35, height: 35)
+            colorToolLayout.minimumLineSpacing = 10
+            colorToolLayout.minimumInteritemSpacing = 10
+            colorToolLayout.scrollDirection = .horizontal
+        
+        self.textColorsCollectionView = UICollectionView(frame: .zero, collectionViewLayout: colorToolLayout)
+        self.textColorsCollectionView.delegate = self
+        self.textColorsCollectionView.dataSource = self
+        self.textColorsCollectionView.showsHorizontalScrollIndicator = false
+        self.textColorsCollectionView.backgroundColor = .clear
+        self.textColorsCollectionView.isHidden = true
+        self.bottomShadowView.addSubview(self.textColorsCollectionView)
+
         ZLEditToolCell.zl_register(self.editToolCollectionView)
         
-        self.doneBtn = UIButton(type: .custom)
-        self.doneBtn.titleLabel?.font = ZLImageEditorLayout.bottomToolTitleFont
-        self.doneBtn.backgroundColor = ZLImageEditorConfiguration.default().editDoneBtnBgColor
-        self.doneBtn.setTitle(localLanguageTextValue(.editFinish), for: .normal)
-        self.doneBtn.addTarget(self, action: #selector(doneBtnClick), for: .touchUpInside)
-        self.doneBtn.layer.masksToBounds = true
-        self.doneBtn.layer.cornerRadius = ZLImageEditorLayout.bottomToolBtnCornerRadius
-        self.bottomShadowView.addSubview(self.doneBtn)
+        ZLDrawColorCell.zl_register(textColorsCollectionView)
+
         
         if tools.contains(.draw) {
             let drawColorLayout = UICollectionViewFlowLayout()
@@ -634,6 +612,8 @@ public class ZLEditImageViewController: UIViewController {
             }
         }
         
+        
+        
         let tapGes = UITapGestureRecognizer(target: self, action: #selector(tapAction(_:)))
         tapGes.delegate = self
         self.view.addGestureRecognizer(tapGes)
@@ -654,6 +634,13 @@ public class ZLEditImageViewController: UIViewController {
                 self.configImageSticker(iv)
             }
         }
+        
+        self.stickersContainer.subviews.forEach { (view) in
+            if view is ZLTextStickerView {
+                (view as? ZLTextStickerView)?.bringToFront()
+            }
+        }
+        
     }
     
     func rotationImageView() {
@@ -793,13 +780,13 @@ public class ZLEditImageViewController: UIViewController {
     }
     
     @objc func doneBtnClick() {
-        var textStickers: [(ZLTextStickerState, Int)] = []
-        var imageStickers: [(ZLImageStickerState, Int)] = []
-        for (index, view) in stickersContainer.subviews.enumerated() {
+        var textStickers: [ZLTextStickerState] = []
+        var imageStickers: [ZLImageStickerState] = []
+        for (_, view) in stickersContainer.subviews.enumerated() {
             if let ts = view as? ZLTextStickerView, let _ = ts.label.text {
-                textStickers.append((ts.state, index))
+                textStickers.append(ts.state)
             } else if let ts = view as? ZLImageStickerView {
-                imageStickers.append((ts.state, index))
+                imageStickers.append(ts.state)
             }
         }
         
@@ -844,11 +831,11 @@ public class ZLEditImageViewController: UIViewController {
     }
     
     @objc func tapAction(_ tap: UITapGestureRecognizer) {
-        if self.bottomShadowView.alpha == 1 {
-            self.setToolView(show: false)
-        } else {
-            self.setToolView(show: true)
-        }
+//        if self.bottomShadowView.alpha == 1 {
+//            self.setToolView(show: false)
+//        } else {
+//            self.setToolView(show: true)
+//        }
     }
     
     @objc func drawAction(_ pan: UIPanGestureRecognizer) {
@@ -980,7 +967,10 @@ public class ZLEditImageViewController: UIViewController {
         }
     }
     
-    func showInputTextVC(_ text: String? = nil, textColor: UIColor? = nil, bgColor: UIColor? = nil, completion: @escaping ( (String, UIColor, UIColor) -> Void )) {
+    func showInputTextVC(_ text: String? = nil,
+                         textColor: String? = nil,
+                         bgColor: String? = nil,
+                         completion: @escaping ( (String, String, String?) -> Void )) {
         // Calculate image displayed frame on the screen.
         var r = self.scrollView.convert(self.view.frame, to: self.containerView)
         r.origin.x += self.scrollView.contentOffset.x / self.scrollView.zoomScale
@@ -990,15 +980,21 @@ public class ZLEditImageViewController: UIViewController {
         r.origin.y *= scale
         r.size.width *= scale
         r.size.height *= scale
-        let bgImage = self.buildImage().clipImage(self.angle, self.editRect)?.clipImage(0, r)
-        let vc = ZLInputTextViewController(image: bgImage, text: text, textColor: textColor, bgColor: bgColor)
+     //   let bgImage = self.buildImage().clipImage(self.angle, self.editRect)?.clipImage(0, r)
+        let vc = ZLInputTextViewController(image: nil,
+                                           text: text,
+                                           textColor: textColor,
+                                           bgColor: bgColor)
         
         vc.endInput = { (text, textColor, bgColor) in
             completion(text, textColor, bgColor)
         }
         
-        vc.modalPresentationStyle = .fullScreen
-        self.showDetailViewController(vc, sender: nil)
+        vc.modalPresentationStyle = .custom
+        vc.modalTransitionStyle = .crossDissolve
+        vc.view.backgroundColor = UIColor.black.withAlphaComponent(0.1)
+        self.present(vc, animated: true)
+    //    self.showDetailViewController(vc, sender: nil)
     }
     
     func getStickerOriginFrame(_ size: CGSize) -> CGRect {
@@ -1015,12 +1011,12 @@ public class ZLEditImageViewController: UIViewController {
     }
     
     /// Add image sticker
-    func addImageStickerView(_ image: UIImage) {
+    func addImageStickerView(_ data: ImageStickerData) {
         let scale = self.scrollView.zoomScale
-        let size = ZLImageStickerView.calculateSize(image: image, width: self.view.frame.width)
+        let size = ZLImageStickerView.calculateSize(image: data.image, width: self.view.frame.width)
         let originFrame = self.getStickerOriginFrame(size)
         
-        let imageSticker = ZLImageStickerView(image: image, originScale: 1 / scale, originAngle: -self.angle, originFrame: originFrame)
+        let imageSticker = ZLImageStickerView(image: data, originScale: 1 / scale, originAngle: -self.angle, originFrame: originFrame)
         self.stickersContainer.addSubview(imageSticker)
         imageSticker.frame = originFrame
         self.view.layoutIfNeeded()
@@ -1029,7 +1025,7 @@ public class ZLEditImageViewController: UIViewController {
     }
     
     /// Add text sticker
-    func addTextStickersView(_ text: String, textColor: UIColor, bgColor: UIColor) {
+    func addTextStickersView(_ text: String, textColor: String, bgColor: String?) {
         guard !text.isEmpty else { return }
         let scale = self.scrollView.zoomScale
         let size = ZLTextStickerView.calculateSize(text: text, width: self.view.frame.width)
@@ -1285,7 +1281,9 @@ extension ZLEditImageViewController: UIScrollViewDelegate {
 }
 
 
-extension ZLEditImageViewController: UICollectionViewDataSource, UICollectionViewDelegate {
+extension ZLEditImageViewController: UICollectionViewDataSource,
+                                     UICollectionViewDelegate,
+                                     UICollectionViewDelegateFlowLayout {
     
     public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if collectionView == editToolCollectionView {
@@ -1294,6 +1292,8 @@ extension ZLEditImageViewController: UICollectionViewDataSource, UICollectionVie
             return drawColors.count
         } else if collectionView == filterCollectionView {
             return thumbnailFilterImages.count
+        } else if collectionView == textColorsCollectionView {
+            return backgroundColors.count
         } else {
             return adjustTools.count
         }
@@ -1307,6 +1307,8 @@ extension ZLEditImageViewController: UICollectionViewDataSource, UICollectionVie
             cell.icon.isHighlighted = false
             cell.toolType = toolType
             cell.icon.isHighlighted = toolType == selectedTool
+            cell.icon.tintColor = .white
+            cell.icon.contentMode = .scaleAspectFit
             
             return cell
         } else if collectionView == drawColorCollectionView {
@@ -1315,13 +1317,26 @@ extension ZLEditImageViewController: UICollectionViewDataSource, UICollectionVie
             let c = drawColors[indexPath.row]
             cell.color = c
             if c == currentDrawColor {
-                cell.bgWhiteView.layer.transform = CATransform3DMakeScale(1.2, 1.2, 1)
+        //        cell.bgWhiteView.layer.transform = CATransform3DMakeScale(1.2, 1.2, 1)
             } else {
-                cell.bgWhiteView.layer.transform = CATransform3DIdentity
+         //       cell.bgWhiteView.layer.transform = CATransform3DIdentity
             }
             
             return cell
-        } else if collectionView == filterCollectionView {
+        } else if collectionView == textColorsCollectionView {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ZLDrawColorCell.zl_identifier(), for: indexPath) as! ZLDrawColorCell
+            
+            let c = backgroundColors[indexPath.row]
+                cell.color = c
+//            if c == currentDrawColor {
+//                cell.bgWhiteView.layer.transform = CATransform3DMakeScale(1.2, 1.2, 1)
+//            } else {
+//                cell.bgWhiteView.layer.transform = CATransform3DIdentity
+//            }
+            //                cell.bgWhiteView.layer.transform = CATransform3DIdentity
+
+            return cell
+        }  else if collectionView == filterCollectionView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ZLFilterImageCell.zl_identifier(), for: indexPath) as! ZLFilterImageCell
             
             let image = thumbnailFilterImages[indexPath.row]
@@ -1376,9 +1391,27 @@ extension ZLEditImageViewController: UICollectionViewDataSource, UICollectionVie
             case .adjust:
                 adjustBtnClick()
                 break
+            case .imagePicker:
+                adjustBtnClick()
+            case .colorPicker:
+                if let index = backgroundColors.firstIndex(of: currentBackgroundColor) {
+                    if backgroundColors.indices.contains(index+1) {
+                        currentBackgroundColor = backgroundColors[index+1]
+                    } else {
+                        currentBackgroundColor = backgroundColors.first!
+                    }
+                } else {
+                    currentBackgroundColor = backgroundColors.first!
+                }
+                
+                imageView.backgroundColor = currentBackgroundColor
+
+                debugPrint("debug color")
             }
         } else if collectionView == drawColorCollectionView {
             currentDrawColor = drawColors[indexPath.row]
+        }else if collectionView == textColorsCollectionView {
+            print("collectionView-> dd")
         } else if collectionView == filterCollectionView {
             currentFilter = ZLImageEditorConfiguration.default().filters[indexPath.row]
             if let image = filterImages[currentFilter.name] {
@@ -1411,6 +1444,21 @@ extension ZLEditImageViewController: UICollectionViewDataSource, UICollectionVie
         collectionView.reloadData()
     }
     
+    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        if collectionView == textColorsCollectionView {
+            let totalCellWidth = Int(40) * backgroundColors.count
+            let totalSpacingWidth = 0
+            if totalCellWidth < Int(collectionView.frame.width){
+                let leftInset = (collectionView.frame.width - CGFloat(totalCellWidth + totalSpacingWidth)) / 2
+                let rightInset = leftInset
+                return UIEdgeInsets(top: 0, left: leftInset, bottom: 0, right: rightInset)
+            }
+            return UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
+        }
+        
+        return .zero
+      
+    }
 }
 
 
@@ -1473,6 +1521,14 @@ extension ZLEditImageViewController: ZLTextStickerViewDelegate {
         self.stickersContainer.subviews.forEach { (view) in
             (view as? ZLStickerViewAdditional)?.gesIsEnabled = true
         }
+        
+        self.stickersContainer.subviews.forEach { (view) in
+            if view is ZLTextStickerView {
+                (view as? ZLTextStickerView)?.bringToFront()
+            }
+        }
+        
+        self.textColorsCollectionView.isHidden = true
     }
     
     func stickerDidTap(_ sticker: UIView) {
@@ -1481,21 +1537,26 @@ extension ZLEditImageViewController: ZLTextStickerViewDelegate {
                 (view as? ZLStickerViewAdditional)?.resetState()
             }
         }
+
+        self.textColorsCollectionView.isHidden = !(sticker is ZLTextStickerView)
+
     }
     
     func sticker(_ textSticker: ZLTextStickerView, editText text: String) {
-        self.showInputTextVC(text, textColor: textSticker.textColor, bgColor: textSticker.bgColor) { [weak self] (text, textColor, bgColor) in
+        self.showInputTextVC(text,
+                             textColor: textSticker.textColor,
+                             bgColor: textSticker.bgColor?.toHexString()) { [weak self] (text, textColor, bgColor) in
             guard let `self` = self else { return }
             if text.isEmpty {
                 textSticker.moveToAshbin()
             } else {
                 textSticker.startTimer()
-                guard textSticker.text != text || textSticker.textColor != textColor || textSticker.bgColor != bgColor else {
+                guard textSticker.text != text || textSticker.textColor != textColor || textSticker.bgColor?.toHexString() != bgColor else {
                     return
                 }
                 textSticker.text = text
                 textSticker.textColor = textColor
-                textSticker.bgColor = bgColor
+                textSticker.bgColor = bgColor?.colorWithHexString()
                 let newSize = ZLTextStickerView.calculateSize(text: text, width: self.view.frame.width)
                 textSticker.changeSize(to: newSize)
             }

@@ -8,7 +8,8 @@
 import UIKit
 import ZLImageEditor
 
-class ImageStickerContainerView: UIView, ZLImageStickerContainerDelegate {
+class ImageStickerContainerView: UIView,
+                                 ZLImageStickerContainerDelegate {
     
     static let baseViewH: CGFloat = 400
     
@@ -16,13 +17,13 @@ class ImageStickerContainerView: UIView, ZLImageStickerContainerDelegate {
     
     var collectionView: UICollectionView!
     
-    var selectImageBlock: ((UIImage) -> Void)?
+    var selectImageBlock: ((ImageStickerData) -> Void)?
     
     var hideBlock: (() -> Void)?
     
     let datas = {
-        (1...18).map { (v) -> String in
-            "imageSticker" + String(v)
+        (1...59).map { (v) -> String in
+            "" + String(v)
         }
     }()
     
@@ -153,7 +154,8 @@ extension ImageStickerContainerView: UIGestureRecognizerDelegate {
 }
 
 
-extension ImageStickerContainerView: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+extension ImageStickerContainerView: UICollectionViewDataSource,
+                                    UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let column: CGFloat = 4
@@ -178,7 +180,7 @@ extension ImageStickerContainerView: UICollectionViewDataSource, UICollectionVie
         guard let image = UIImage(named: self.datas[indexPath.row]) else {
             return
         }
-        self.selectImageBlock?(image)
+        self.selectImageBlock?(ImageStickerData(image: image, name: "\(indexPath.row+1)"))
         self.hide()
     }
     
