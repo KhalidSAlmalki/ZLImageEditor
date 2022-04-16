@@ -60,7 +60,8 @@ public class ZLEditImageViewController: UIViewController {
     var editImageAdjustRef: UIImage?
     
     var cancelBtn: UIButton!
-    
+    var doneBtn: UIButton!
+
     var scrollView: UIScrollView!
     
     var containerView: UIView!
@@ -283,8 +284,9 @@ public class ZLEditImageViewController: UIViewController {
         
         self.topShadowView.frame = CGRect(x: 0, y: 0, width: self.view.frame.width, height: 150)
         self.topShadowLayer.frame = self.topShadowView.bounds
-        self.cancelBtn.frame = CGRect(x: 30, y: insets.top + 10, width: 28, height: 28)
-        
+        self.cancelBtn.frame = CGRect(x: 30, y: insets.top + 10, width: 60, height: 28)
+        self.doneBtn.frame = CGRect(x: self.topShadowLayer.frame.width-60, y: insets.top + 10, width: 40, height: 28)
+
         self.bottomShadowView.frame = CGRect(x: 0,
                                              y: self.view.frame.height - 140 - insets.bottom,
                                              width: self.view.frame.width,
@@ -424,11 +426,17 @@ public class ZLEditImageViewController: UIViewController {
         self.topShadowView.layer.addSublayer(self.topShadowLayer)
         
         self.cancelBtn = UIButton(type: .custom)
-        self.cancelBtn.setImage(getImage("zl_retake"), for: .normal)
+        self.cancelBtn.setTitle("Cancel", for: .normal)
         self.cancelBtn.addTarget(self, action: #selector(cancelBtnClick), for: .touchUpInside)
         self.cancelBtn.adjustsImageWhenHighlighted = false
         self.cancelBtn.zl_enlargeValidTouchArea(inset: 30)
         self.topShadowView.addSubview(self.cancelBtn)
+        
+        self.doneBtn = UIButton(type: .custom)
+        self.doneBtn.setTitle("Save", for: .normal)
+        self.doneBtn.addTarget(self, action: #selector(doneBtnClick), for: .touchUpInside)
+        self.doneBtn.zl_enlargeValidTouchArea(inset: 30)
+        self.topShadowView.addSubview(self.doneBtn)
         
         self.bottomShadowView = UIView()
         self.view.addSubview(self.bottomShadowView)
@@ -467,7 +475,6 @@ public class ZLEditImageViewController: UIViewController {
         ZLEditToolCell.zl_register(self.editToolCollectionView)
         
         ZLDrawColorCell.zl_register(textColorsCollectionView)
-
         
         if tools.contains(.draw) {
             let drawColorLayout = UICollectionViewFlowLayout()
@@ -702,6 +709,15 @@ public class ZLEditImageViewController: UIViewController {
             self.bottomShadowView.alpha = 0
             self.adjustSlider?.alpha = 0
         }
+    }
+    
+    func imagePickerBtnClick() {
+        
+        let picker = UIImagePickerController()
+        picker.delegate = self
+        picker.sourceType = .photoLibrary
+        picker.mediaTypes = ["public.image"]
+        self.present(picker, animated: true)
     }
     
     func imageStickerBtnClick() {
@@ -1392,7 +1408,7 @@ extension ZLEditImageViewController: UICollectionViewDataSource,
                 adjustBtnClick()
                 break
             case .imagePicker:
-                adjustBtnClick()
+                imagePickerBtnClick()
             case .colorPicker:
                 if let index = backgroundColors.firstIndex(of: currentBackgroundColor) {
                     if backgroundColors.indices.contains(index+1) {
@@ -1461,6 +1477,23 @@ extension ZLEditImageViewController: UICollectionViewDataSource,
     }
 }
 
+extension ZLEditImageViewController: UIImagePickerControllerDelegate,
+                                     UINavigationControllerDelegate {
+    
+    public func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        picker.dismiss(animated: true, completion: nil)
+    }
+    
+    public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        picker.dismiss(animated: true) {
+            guard let image = info[.originalImage] as? UIImage else { return }
+            self.editImage = image
+            self.imageView.image = image
+            self.imageView.contentMode = .scaleAspectFill
+        }
+    }
+    
+}
 
 extension ZLEditImageViewController: ZLTextStickerViewDelegate {
     
