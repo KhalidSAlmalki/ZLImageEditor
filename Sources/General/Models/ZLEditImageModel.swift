@@ -29,6 +29,8 @@ public class ZLEditImageModel: NSObject {
     public let textStickers: [ZLTextStickerState]?
     public let imageStickers: [ZLImageStickerState]?
     
+    public var customBackgroundImage: UIImage?
+
     public init(
         drawPaths: [ZLDrawPath],
         mosaicPaths: [ZLMosaicPath],
@@ -40,7 +42,8 @@ public class ZLEditImageModel: NSObject {
         selectRatio: ZLImageClipRatio?,
         selectFilter: ZLFilter,
         textStickers: [ZLTextStickerState]?,
-        imageStickers: [ZLImageStickerState]?
+        imageStickers: [ZLImageStickerState]?,
+        customBackgroundImage: UIImage?
     ) {
         self.drawPaths = drawPaths
         self.mosaicPaths = mosaicPaths
@@ -53,7 +56,25 @@ public class ZLEditImageModel: NSObject {
         self.selectFilter = selectFilter
         self.textStickers = textStickers
         self.imageStickers = imageStickers
+        self.customBackgroundImage = customBackgroundImage
         super.init()
     }
     
+    convenience public init(customBackgroundImage: UIImage?,
+                     customBackgroundColor: String?,
+                     textStickers: [ZLTextStickerState]?,
+                     imageStickers: [ZLImageStickerState]?) {
+        self.init(drawPaths: [],
+                  mosaicPaths: [],
+                  editRect: nil,
+                  angle: 0,
+                  brightness: 0,
+                  contrast: 0,
+                  saturation: 0,
+                  selectRatio: .wh1x1,
+                  selectFilter: .normal,
+                  textStickers: textStickers,
+                  imageStickers: imageStickers,
+                  customBackgroundImage: customBackgroundImage)
+    }
 }

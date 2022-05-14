@@ -27,6 +27,7 @@ class ImageStickerContainerView: UIView,
         }
     }()
     
+  
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.setupUI()
@@ -105,6 +106,10 @@ class ImageStickerContainerView: UIView,
     
     @objc func hideBtnClick() {
         self.hide()
+    }
+    
+    func getImage(imageName: String, _ onComplete: @escaping ((ImageStickerData) -> Void)) {
+        
     }
     
     func show(in view: UIView) {

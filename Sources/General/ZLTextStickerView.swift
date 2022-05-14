@@ -477,7 +477,7 @@ public class ZLTextStickerState: Codable {
     let gesRotation: CGFloat
     let totalTranslationPoint: CGPoint
     
-    init(text: String,
+    public init(text: String,
          textColor: String,
          bgColor: String?,
          originScale: CGFloat,

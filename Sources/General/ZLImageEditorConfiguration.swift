@@ -356,6 +356,8 @@ extension ZLImageClipRatio {
     
     @objc func show(in view: UIView)
     
+    @objc func getImage(imageName: String, _ onComplete: @escaping((ImageStickerData) -> Void ))
+
 }
 
 public class ImageStickerData: NSObject {

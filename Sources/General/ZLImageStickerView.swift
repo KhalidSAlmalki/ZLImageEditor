@@ -113,16 +113,26 @@ class ZLImageStickerView: UIView, ZLStickerViewAdditional {
         self.cleanTimer()
     }
     
-    convenience init(from state: ZLImageStickerState) {
-        self.init(image: ImageStickerData(image: UIImage(named: state.imageName)!,
-                                          name: state.imageName),
+    convenience init(from state: ZLImageStickerState,
+                     imageStickerData: ImageStickerData) {
+        self.init(image: imageStickerData,
                   originScale: state.originScale,
                   originAngle: state.originAngle,
-                  originFrame: state.originFrame, gesScale: state.gesScale, gesRotation: state.gesRotation, totalTranslationPoint: state.totalTranslationPoint, showBorder: false)
+                  originFrame: state.originFrame,
+                  gesScale: state.gesScale,
+                  gesRotation: state.gesRotation,
+                  totalTranslationPoint: state.totalTranslationPoint,
+                  showBorder: false)
     }
     
     init(image: ImageStickerData,
-         originScale: CGFloat, originAngle: CGFloat, originFrame: CGRect, gesScale: CGFloat = 1, gesRotation: CGFloat = 0, totalTranslationPoint: CGPoint = .zero, showBorder: Bool = true) {
+         originScale: CGFloat,
+         originAngle: CGFloat,
+         originFrame: CGRect,
+         gesScale: CGFloat = 1,
+         gesRotation: CGFloat = 0,
+         totalTranslationPoint: CGPoint = .zero,
+         showBorder: Bool = true) {
         self.image = image
         self.originScale = originScale
         self.originAngle = originAngle
@@ -428,7 +438,7 @@ public class ZLImageStickerState: NSObject,
         case imageName
     }
     
-    init(imageName: String,
+    public init(imageName: String,
          originScale: CGFloat,
          originAngle: CGFloat,
          originFrame: CGRect,
