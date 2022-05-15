@@ -17,8 +17,7 @@ Pod::Spec.new do |s|
   s.frameworks            = 'UIKit', 'Accelerate'
 
   s.resources             = 'Sources/*.{png,bundle}'
-  s.dependency 'Palette'
-
+  
   s.subspec "Core" do |sp|
     sp.source_files  = ["Sources/**/*.swift", "Sources/ZLImageEditor.h"]
   end
