@@ -70,6 +70,8 @@ public class ZLEditImageViewController: UIViewController {
     
     var containerView: UIView!
     
+    lazy var dumyViewBorder = UIView()
+
     // Show image.
     var imageView: UIImageView!
     
@@ -222,7 +224,7 @@ public class ZLEditImageViewController: UIViewController {
         editImage = originalImage
         editImageWithoutAdjust = originalImage
         drawColors = ZLImageEditorConfiguration.default().drawColors
-        backgroundColors = drawColors
+        backgroundColors = [.clear, .red, .yellow, .white]
         currentFilter = editModel?.selectFilter ?? .normal
         drawPaths = editModel?.drawPaths ?? []
         mosaicPaths = editModel?.mosaicPaths ?? []
@@ -249,7 +251,8 @@ public class ZLEditImageViewController: UIViewController {
         }
         
         self.currentBackgroundColor = self.backgroundColors.first!
-        
+        setStyleForImageBorder()
+
         let teStic = editModel?.textStickers ?? []
         let imStic = editModel?.imageStickers ?? []
         
@@ -385,6 +388,8 @@ public class ZLEditImageViewController: UIViewController {
         let w = ratio * editSize.width * self.scrollView.zoomScale
         let h = ratio * editSize.height * self.scrollView.zoomScale
         self.containerView.frame = CGRect(x: max(0, (scrollViewSize.width-w)/2), y: max(0, (scrollViewSize.height-h)/2), width: w, height: h)
+        self.dumyViewBorder.frame = self.containerView.frame
+        self.dumyViewBorder.center = view.center
         
         let scaleImageOrigin = CGPoint(x: -self.editRect.origin.x*ratio, y: -self.editRect.origin.y*ratio)
         let scaleImageSize = CGSize(width: self.backgroundimageSize.width * ratio, height: self.backgroundimageSize.height * ratio)
@@ -393,7 +398,9 @@ public class ZLEditImageViewController: UIViewController {
         self.mosaicImageLayerMaskLayer?.frame = self.imageView.bounds
         self.drawingImageView.frame = self.imageView.frame
         self.stickersContainer.frame = self.imageView.frame
-        
+        self.dumyViewBorder.frame = self.stickersContainer.frame
+        self.dumyViewBorder.center = view.center
+
         // Optimization for long pictures.
         if (self.editRect.height / self.editRect.width) > (self.view.frame.height / self.view.frame.width * 1.1) {
             let widthScale = self.view.frame.width / w
@@ -447,9 +454,7 @@ public class ZLEditImageViewController: UIViewController {
         self.imageView.clipsToBounds = true
         self.imageView.backgroundColor = currentBackgroundColor
         self.containerView.addSubview(self.imageView)
-        self.imageView.layer.cornerRadius = 20
-        self.imageView.clipsToBounds = true
-
+        
         self.drawingImageView = UIImageView()
         self.drawingImageView.contentMode = .scaleAspectFit
         self.drawingImageView.isUserInteractionEnabled = true
@@ -458,9 +463,18 @@ public class ZLEditImageViewController: UIViewController {
         self.stickersContainer = UIView()
         self.containerView.addSubview(self.stickersContainer)
 
-        self.stickersContainer.layer.cornerRadius = 20
-        self.stickersContainer.clipsToBounds = true
         
+
+        self.view.addSubview(dumyViewBorder)
+        dumyViewBorder.frame = self.stickersContainer.frame
+   
+        self.dumyViewBorder.layer.borderColor = UIColor.clear.cgColor
+        self.dumyViewBorder.layer.borderWidth = 1
+        self.dumyViewBorder.backgroundColor = .clear
+        self.dumyViewBorder.isUserInteractionEnabled = false
+        
+        setStyleForImageBorder()
+
         let color1 = UIColor.black.withAlphaComponent(0.35).cgColor
         let color2 = UIColor.black.withAlphaComponent(0).cgColor
         self.topShadowView = UIView()
@@ -1042,13 +1056,16 @@ public class ZLEditImageViewController: UIViewController {
                                            textColor: textColor,
                                            bgColor: bgColor)
         
-        vc.endInput = { (text, textColor, bgColor) in
+        vc.endInput = { [weak self] (text, textColor, bgColor)  in
             completion(text, textColor, bgColor)
+            self?.topShadowView.isHidden = false
         }
         
         vc.modalPresentationStyle = .custom
         vc.modalTransitionStyle = .crossDissolve
         vc.view.backgroundColor = UIColor.black.withAlphaComponent(0.1)
+        topShadowView.isHidden = true
+        
         self.present(vc, animated: true)
     }
     
@@ -1225,7 +1242,7 @@ public class ZLEditImageViewController: UIViewController {
     }
     
     func buildImage() -> UIImage {
-        return UIImage(view: containerView!) ?? .init()
+        return UIImage(view: containerView) ?? .init()
     }
     
     func finishClipDismissAnimate() {
@@ -1241,15 +1258,19 @@ public class ZLEditImageViewController: UIViewController {
 
 extension UIImage {
 
-    convenience init?(view: UIView?) {
+    convenience init?(view: UIView?, shouldCornerRadius: Bool = false) {
         guard let view: UIView = view else { return nil }
 
+        if shouldCornerRadius {
+            view.layer.cornerRadius = 20
+            view.clipsToBounds = true
+        }
+        
         UIGraphicsBeginImageContextWithOptions(view.bounds.size, false, UIScreen.main.scale)
         guard let context: CGContext = UIGraphicsGetCurrentContext() else {
             UIGraphicsEndImageContext()
             return nil
         }
-
         view.layer.render(in: context)
         let contextImage: UIImage? = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
@@ -1262,6 +1283,7 @@ extension UIImage {
         self.init(data: pngData)
     }
 
+    
 }
 
 extension ZLEditImageViewController: UIGestureRecognizerDelegate {
@@ -1429,6 +1451,14 @@ extension ZLEditImageViewController: UICollectionViewDataSource,
         }
     }
     
+    fileprivate func setStyleForImageBorder() {
+        if currentBackgroundColor == .clear {
+            dumyViewBorder.layer.borderColor = UIColor.white.cgColor
+        } else {
+            dumyViewBorder.layer.borderColor = UIColor.clear.cgColor
+        }
+    }
+    
     public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if collectionView == editToolCollectionView {
             let toolType = tools[indexPath.row]
@@ -1462,10 +1492,16 @@ extension ZLEditImageViewController: UICollectionViewDataSource,
                 }
                 
                 imageView.backgroundColor = currentBackgroundColor
+                imageView.image = nil
+                backgroundImage = nil
+                setStyleForImageBorder()
                 
                 if let image = UIImage(view: self.imageView) {
                     editImage = image
+                    backgroundImage = image
                 }
+                
+                
             }
         } else if collectionView == drawColorCollectionView {
             currentDrawColor = drawColors[indexPath.row]
