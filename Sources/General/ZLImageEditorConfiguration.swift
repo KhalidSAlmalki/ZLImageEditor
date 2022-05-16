@@ -52,11 +52,7 @@ public class ZLImageEditorConfiguration: NSObject {
     /// - warning: If you want to use the image sticker feature, you must provide a view that implements ZLImageStickerContainerDelegate.
     public var tools: [ZLImageEditorConfiguration.EditTool] {
         get {
-            if pri_tools.isEmpty {
-                return [.draw, .clip, .imageSticker, .textSticker, .mosaic, .filter, .adjust]
-            } else {
-                return pri_tools
-            }
+            return pri_tools
         }
         set {
             pri_tools = newValue
@@ -64,7 +60,6 @@ public class ZLImageEditorConfiguration: NSObject {
     }
     
     private var pri_drawColors: [UIColor] = [.white,
-                                             .red,
                                              zlRGB(241, 79, 79),
                                              zlRGB(243, 170, 78),
                                              zlRGB(80, 169, 56),
@@ -73,11 +68,7 @@ public class ZLImageEditorConfiguration: NSObject {
     /// Draw colors for image editor.
     @objc public var drawColors: [UIColor] {
         get {
-            if pri_drawColors.isEmpty {
-                return [.white, .red, zlRGB(241, 79, 79), zlRGB(243, 170, 78), zlRGB(80, 169, 56), zlRGB(30, 183, 243), zlRGB(139, 105, 234)]
-            } else {
-                return pri_drawColors
-            }
+            return pri_drawColors
         }
         set {
             pri_drawColors = newValue
@@ -86,7 +77,7 @@ public class ZLImageEditorConfiguration: NSObject {
     
     /// The default draw color. If this color not in editImageDrawColors, will pick the first color in editImageDrawColors as the default.
     @objc public var defaultDrawColor = zlRGB(241, 79, 79)
-    @objc public var defaultBackgroundColor: UIColor = .red
+    @objc public var defaultBackgroundColor: UIColor = .clear
 
     private var pri_clipRatios: [ZLImageClipRatio] = [.custom]
     /// Edit ratios for image editor.
@@ -110,17 +101,25 @@ public class ZLImageEditorConfiguration: NSObject {
                                                         zlRGB(80, 169, 56),
                                                         zlRGB(30, 183, 243),
                                                         zlRGB(139, 105, 234)]
+    
+    private var pri_imageBackgroundColors: [UIColor] = [.clear]
     /// Text sticker colors for image editor.
     @objc public var textStickerTextColors: [UIColor] {
         get {
-            if pri_textStickerTextColors.isEmpty {
-                return [.white, .black, zlRGB(241, 79, 79), zlRGB(243, 170, 78), zlRGB(80, 169, 56), zlRGB(30, 183, 243), zlRGB(139, 105, 234)]
-            } else {
-                return pri_textStickerTextColors
-            }
+            return pri_textStickerTextColors
         }
         set {
             pri_textStickerTextColors = newValue
+        }
+    }
+    
+    /// Text sticker colors for image editor.
+    @objc public var imageBackgroundColors: [UIColor] {
+        get {
+            return pri_imageBackgroundColors
+        }
+        set {
+            pri_imageBackgroundColors = newValue
         }
     }
     
@@ -144,6 +143,8 @@ public class ZLImageEditorConfiguration: NSObject {
     
     @objc public var imageStickerContainerView: (UIView & ZLImageStickerContainerDelegate)? = nil
     
+    @objc public var colorsDataSource: ZLColorDataSource? = nil
+
     private var pri_adjustTools: [ZLImageEditorConfiguration.AdjustTool] = [.brightness, .contrast, .saturation]
     /// Adjust image tools. (Default order is brightness, contrast, saturation)
     /// Valid when the tools contain EditTool.adjust
@@ -368,4 +369,13 @@ public class ImageStickerData: NSObject {
         self.image = image
         self.name = name
     }
+}
+
+@objc public protocol ZLColorDataSource {
+    
+    @objc func getTextColors(editImage: UIImage?,
+                            _ onComplete: @escaping(([UIColor]) -> Void ))
+    @objc func getBackgroundColors(editImage: UIImage?,
+                            _ onComplete: @escaping(([UIColor]) -> Void ))
+
 }

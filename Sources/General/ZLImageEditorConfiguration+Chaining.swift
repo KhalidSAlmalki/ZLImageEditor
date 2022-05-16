@@ -83,6 +83,12 @@ extension ZLImageEditorConfiguration {
     }
     
     @discardableResult
+    public func colorsDataSource(_ dataSource: ZLColorDataSource?) -> ZLImageEditorConfiguration {
+        colorsDataSource = dataSource
+        return self
+    }
+    
+    @discardableResult
     public func adjustTools(_ tools: [ZLImageEditorConfiguration.AdjustTool]) -> ZLImageEditorConfiguration {
         adjustTools = tools
         return self

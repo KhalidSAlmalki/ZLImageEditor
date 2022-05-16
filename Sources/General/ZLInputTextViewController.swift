@@ -201,7 +201,9 @@ class ZLInputTextViewController: UIViewController {
 }
 
 
-extension ZLInputTextViewController: UICollectionViewDelegate, UICollectionViewDataSource {
+extension ZLInputTextViewController: UICollectionViewDelegate,
+                                     UICollectionViewDataSource,
+                                     UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return ZLImageEditorConfiguration.default().textStickerTextColors.count
@@ -222,6 +224,18 @@ extension ZLInputTextViewController: UICollectionViewDelegate, UICollectionViewD
         self.textView.tintColor =  self.currentTextColor
         collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
         collectionView.reloadData()
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        
+        let totalCellWidth = Int(40) * ZLImageEditorConfiguration.default().textStickerTextColors.count
+        let totalSpacingWidth = 0
+        if totalCellWidth < Int(collectionView.frame.width){
+            let leftInset = (collectionView.frame.width - CGFloat(totalCellWidth + totalSpacingWidth)) / 2
+            let rightInset = leftInset
+            return UIEdgeInsets(top: 0, left: leftInset, bottom: 0, right: rightInset)
+        }
+        return UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
     }
     
     

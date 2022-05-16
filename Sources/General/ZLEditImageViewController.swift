@@ -119,9 +119,9 @@ public class ZLEditImageViewController: UIViewController {
     
     var ashbinImgView: UIImageView!
     
+    //colors
     let drawColors: [UIColor]
-    
-    let backgroundColors: [UIColor]
+    var backgroundColors: [UIColor] = ZLImageEditorConfiguration.default().imageBackgroundColors
     var currentBackgroundColor: UIColor = ZLImageEditorConfiguration.default().defaultBackgroundColor
 
     var currentDrawColor = ZLImageEditorConfiguration.default().defaultDrawColor
@@ -224,7 +224,7 @@ public class ZLEditImageViewController: UIViewController {
         editImage = originalImage
         editImageWithoutAdjust = originalImage
         drawColors = ZLImageEditorConfiguration.default().drawColors
-        backgroundColors = [.clear, .red, .yellow, .white]
+
         currentFilter = editModel?.selectFilter ?? .normal
         drawPaths = editModel?.drawPaths ?? []
         mosaicPaths = editModel?.mosaicPaths ?? []
@@ -310,12 +310,17 @@ public class ZLEditImageViewController: UIViewController {
         self.doneBtn.frame = CGRect(x: self.topShadowLayer.frame.width-60, y: insets.top + 10, width: 40, height: 28)
 
         self.bottomShadowView.frame = CGRect(x: 0,
-                                             y: self.view.frame.height - 140 - insets.bottom,
+                                             y: self.view.frame.height - 160 - insets.bottom,
                                              width: self.view.frame.width,
                                              height: 140 + insets.bottom)
+        
+        self.bottomShadowView.center.x = view.center.x
         self.bottomShadowLayer.frame = self.bottomShadowView.bounds
         
-        self.drawColorCollectionView?.frame = CGRect(x: 20, y: 20, width: self.view.frame.width - 80, height: ZLEditImageViewController.drawColViewH)
+        self.drawColorCollectionView?.frame = CGRect(x: 20,
+                                                     y: 20,
+                                                     width: self.view.frame.width - 80,
+                                                     height: ZLEditImageViewController.drawColViewH)
         
         self.textColorsCollectionView?.frame = CGRect(x: 0, y: 30, width: self.view.frame.width, height: 35)
 
@@ -695,6 +700,7 @@ public class ZLEditImageViewController: UIViewController {
         
         self.imageView.contentMode = .scaleAspectFill
 
+        configColors()
     }
     
     func rotationImageView() {
@@ -1059,6 +1065,7 @@ public class ZLEditImageViewController: UIViewController {
         vc.endInput = { [weak self] (text, textColor, bgColor)  in
             completion(text, textColor, bgColor)
             self?.topShadowView.isHidden = false
+            self?.configColors()
         }
         
         vc.modalPresentationStyle = .custom
@@ -1094,6 +1101,7 @@ public class ZLEditImageViewController: UIViewController {
         self.view.layoutIfNeeded()
         
         self.configImageSticker(imageSticker)
+        self.configColors()
     }
     
     /// Add text sticker
@@ -1254,6 +1262,17 @@ public class ZLEditImageViewController: UIViewController {
         }
     }
 
+    func configColors() {
+        editImage = buildImage()
+        ZLImageEditorConfiguration.default().colorsDataSource?.getTextColors(editImage: editImage, { colors in
+            ZLImageEditorConfiguration.default().textStickerTextColors = colors
+        })
+        
+        ZLImageEditorConfiguration.default().colorsDataSource?.getBackgroundColors(editImage: editImage, { colors in
+            ZLImageEditorConfiguration.default().imageBackgroundColors = colors
+            self.backgroundColors = colors
+        })
+    }
 }
 
 extension UIImage {
@@ -1570,7 +1589,7 @@ extension ZLEditImageViewController: UIImagePickerControllerDelegate,
             self.imageView.contentMode = .redraw
             self.backgroundImage = UIImage(view: self.imageView) ?? image
             self.imageView.image = self.backgroundImage
-
+            self.configColors()
         }
     }
     

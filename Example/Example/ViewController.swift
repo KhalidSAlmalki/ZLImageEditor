@@ -40,9 +40,10 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         
        self.setupUI()
+        let container = ImageStickerContainerView()
         ZLImageEditorConfiguration.default()
             // Provide a image sticker container view
-            .imageStickerContainerView(ImageStickerContainerView())
+            .imageStickerContainerView(ImageStickerContainerView()).colorsDataSource(container)
             // Custom filter
 //            .filters = [.normal]
         

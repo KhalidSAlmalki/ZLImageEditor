@@ -9,7 +9,8 @@ import UIKit
 import ZLImageEditor
 
 class ImageStickerContainerView: UIView,
-                                 ZLImageStickerContainerDelegate {
+                                 ZLImageStickerContainerDelegate,
+                                 ZLColorDataSource {
     
     static let baseViewH: CGFloat = 400
     
@@ -144,6 +145,14 @@ class ImageStickerContainerView: UIView,
             self.isHidden = true
         }
 
+    }
+    
+    func getTextColors(editImage: UIImage?, _ onComplete: @escaping (([UIColor]) -> Void)) {
+        onComplete([.white, .green, .lightGray])
+    }
+    
+    func getBackgroundColors(editImage: UIImage?, _ onComplete: @escaping (([UIColor]) -> Void)) {
+        onComplete([.clear, .green, .lightGray])
     }
     
 }
