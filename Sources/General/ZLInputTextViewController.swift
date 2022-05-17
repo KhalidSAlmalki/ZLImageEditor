@@ -98,17 +98,14 @@ class ZLInputTextViewController: UIViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
-        var insets = UIEdgeInsets.zero
-        if #available(iOS 11.0, *) {
-            insets = self.view.safeAreaInsets
-        }
+    
         
-        let btnY = insets.top + 20
+        let btnY = UIScreen.main.heightOfSafeArea()
         let cancelBtnW = localLanguageTextValue(.cancel).boundingRect(font: ZLImageEditorLayout.bottomToolTitleFont, limitSize: CGSize(width: .greatestFiniteMagnitude, height: ZLImageEditorLayout.bottomToolBtnH)).width + 20
-        self.cancelBtn.frame = CGRect(x: 15, y: btnY, width: cancelBtnW, height: ZLImageEditorLayout.bottomToolBtnH)
+        self.cancelBtn.frame = CGRect(x: 30, y: btnY, width: cancelBtnW, height: ZLImageEditorLayout.bottomToolBtnH)
         
         let doneBtnW = localLanguageTextValue(.done).boundingRect(font: ZLImageEditorLayout.bottomToolTitleFont, limitSize: CGSize(width: .greatestFiniteMagnitude, height: ZLImageEditorLayout.bottomToolBtnH)).width + 20
-        self.doneBtn.frame = CGRect(x: view.bounds.width - 20 - doneBtnW, y: btnY, width: doneBtnW, height: ZLImageEditorLayout.bottomToolBtnH)
+        self.doneBtn.frame = CGRect(x: view.bounds.width - 30 - doneBtnW, y: btnY, width: doneBtnW, height: ZLImageEditorLayout.bottomToolBtnH)
         
         self.textView.frame = CGRect(x: 20,
                                      y: cancelBtn.frame.maxY + 20,

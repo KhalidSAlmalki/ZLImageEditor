@@ -296,18 +296,23 @@ public class ZLEditImageViewController: UIViewController {
         }
         self.shouldLayout = false
         zl_debugPrint("edit image layout subviews")
-        var insets = UIEdgeInsets.zero
-        if #available(iOS 11.0, *) {
-            insets = self.view.safeAreaInsets
-        }
+        
+        let insets = self.view.safeAreaInsets
+      
         
         self.scrollView.frame = self.view.bounds
         self.resetContainerViewFrame()
-        
-        self.topShadowView.frame = CGRect(x: 0, y: 0, width: self.view.frame.width, height: 150)
+        let bnY =  UIScreen.main.heightOfSafeArea()
+        self.topShadowView.frame = CGRect(x: 0,
+                                          y: 0,
+                                          width: self.view.frame.width,
+                                          height: 150)
         self.topShadowLayer.frame = self.topShadowView.bounds
-        self.cancelBtn.frame = CGRect(x: 30, y: insets.top + 10, width: 60, height: 28)
-        self.doneBtn.frame = CGRect(x: self.topShadowLayer.frame.width-60, y: insets.top + 10, width: 40, height: 28)
+        self.cancelBtn.frame = CGRect(x: 30, y: bnY, width: 60, height: 28)
+        self.doneBtn.frame = CGRect(x: self.topShadowLayer.frame.width-70,
+                                    y: bnY,
+                                    width: 40,
+                                    height: 28)
 
         self.bottomShadowView.frame = CGRect(x: 0,
                                              y: self.view.frame.height - 160 - insets.bottom,

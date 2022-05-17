@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name                  = 'ZLImageEditor'
-  s.version               = '1.0.6'
+  s.version               = '1.0.7'
   s.summary               = 'A powerful image editor framework. Supports graffiti, cropping, mosaic, text stickers, picture stickers, filters, adjust(brightness, contrast, saturation).'
 
   s.homepage              = 'https://github.com/longitachi/ZLImageEditor'
@@ -17,7 +17,7 @@ Pod::Spec.new do |s|
   s.frameworks            = 'UIKit', 'Accelerate'
 
   s.resources             = 'Sources/*.{png,bundle}'
-  
+
   s.subspec "Core" do |sp|
     sp.source_files  = ["Sources/**/*.swift", "Sources/ZLImageEditor.h"]
   end
