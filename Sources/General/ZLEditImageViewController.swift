@@ -166,8 +166,12 @@ public class ZLEditImageViewController: UIViewController {
                       height: 375)
     }
     
+    var lodaingImageQueue: [String] = []
+    
     @objc public var editFinishBlock: ( (UIImage, ZLEditImageModel) -> Void )?
     
+    @objc public var didFinishSetupBlock: ( (UIImage) -> Void )?
+
     public override var prefersStatusBarHidden: Bool {
         return true
     }
@@ -250,7 +254,7 @@ public class ZLEditImageViewController: UIViewController {
             self.currentDrawColor = self.drawColors.first!
         }
         
-        self.currentBackgroundColor = self.backgroundColors.first!
+   //     self.currentBackgroundColor = self.backgroundColors.first!
         setStyleForImageBorder()
 
         let teStic = editModel?.textStickers ?? []
@@ -264,11 +268,13 @@ public class ZLEditImageViewController: UIViewController {
         }
         
         imStic.forEach { (cache) in
+            self.addTolodaingImageQueue(cache.imageName)
             ZLImageEditorConfiguration.default().imageStickerContainerView?.getImage(imageName: cache.imageName, { data in
                 let v = ZLImageStickerView(from: cache, imageStickerData: data)
                 stickers.append(v)
                 self.stickers = stickers.compactMap { $0 }
                 self.setupStickers()
+                self.removeTolodaingImageQueue(data.name)
             })
         }
         
@@ -276,6 +282,21 @@ public class ZLEditImageViewController: UIViewController {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func addTolodaingImageQueue(_ item: String) {
+        self.lodaingImageQueue.append(item)
+    }
+    
+    private func removeTolodaingImageQueue(_ item: String) {
+        self.lodaingImageQueue.removeAll(where: {$0 == item})
+        sendDidFinshSetupIfNeeded()
+    }
+    
+    func sendDidFinshSetupIfNeeded() {
+        if self.lodaingImageQueue.isEmpty {
+            self.didFinishSetupBlock?(UIImage(view: self.containerView)!)
+        }
     }
     
     public override func viewDidLoad() {
@@ -431,6 +452,8 @@ public class ZLEditImageViewController: UIViewController {
             self.stickersContainer.addSubview(view)
             if let tv = view as? ZLTextStickerView {
                 tv.frame = tv.originFrame
+                tv.frame.size = ZLTextStickerView.calculateSize(text: tv.label.text ?? "",
+                                                                width: self.view.frame.width)
                 self.configTextSticker(tv)
             } else if let iv = view as? ZLImageStickerView {
                 iv.frame = iv.originFrame
@@ -1777,5 +1800,4 @@ public class ZLMosaicPath: NSObject {
         self.path.addLine(to: point)
         self.linePoints.append(CGPoint(x: point.x / self.ratio, y: point.y / self.ratio))
     }
-    
 }
