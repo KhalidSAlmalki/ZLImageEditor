@@ -313,6 +313,7 @@ public class ZLEditImageViewController: UIViewController {
     public override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         guard self.shouldLayout else {
+            self.editToolCollectionView.center.x = bottomShadowView.center.x
             return
         }
         self.shouldLayout = false
@@ -357,14 +358,15 @@ public class ZLEditImageViewController: UIViewController {
         
         self.filterCollectionView?.frame = CGRect(x: 20, y: 0, width: self.view.frame.width - 40, height: ZLEditImageViewController.filterColViewH)
         
-        let toolY: CGFloat = 85
+        let toolY: CGFloat = 50
         
         
         self.editToolCollectionView.frame = CGRect(x: 0,
                                                    y: toolY,
-                                                   width: self.view.bounds.width,
+                                                   width: CGFloat((self.tools.count*60)),
                                                    height: 50)
-        self.editToolCollectionView.frame.origin.x = self.view.center.x-(CGFloat((self.tools.count*60))/2)
+
+        self.editToolCollectionView.center.x = bottomShadowView.center.x
         
         if !self.drawPaths.isEmpty {
             self.drawLine()

@@ -26,7 +26,8 @@
 
 import UIKit
 
-class ZLInputTextViewController: UIViewController {
+class ZLInputTextViewController: UIViewController,
+                                 UIGestureRecognizerDelegate {
 
     static let collectionViewHeight: CGFloat = 50
     
@@ -55,6 +56,8 @@ class ZLInputTextViewController: UIViewController {
         return true
     }
     
+    lazy var tap = UITapGestureRecognizer(target: self, action: #selector(cancelBtnClick))
+
     init(image: UIImage?,
          text: String? = nil,
          textColor: String? = nil,
@@ -137,16 +140,16 @@ class ZLInputTextViewController: UIViewController {
         self.cancelBtn.titleLabel?.font = ZLImageEditorLayout.bottomToolTitleFont
         self.cancelBtn.addTarget(self, action: #selector(cancelBtnClick), for: .touchUpInside)
         view.addSubview(self.cancelBtn)
-        
+        self.cancelBtn.isHidden = true
+
         self.doneBtn = UIButton(type: .custom)
         self.doneBtn.setTitle(localLanguageTextValue(.done), for: .normal)
         self.doneBtn.titleLabel?.font = ZLImageEditorLayout.bottomToolTitleFont
         self.doneBtn.addTarget(self, action: #selector(doneBtnClick), for: .touchUpInside)
         view.addSubview(self.doneBtn)
-        
         self.textView = UITextView(frame: .zero)
         self.textView.keyboardAppearance = .dark
-        self.textView.returnKeyType = .done
+        self.textView.returnKeyType = .default
         self.textView.delegate = self
         self.textView.backgroundColor = .clear
         self.textView.tintColor = ZLImageEditorConfiguration.default().editDoneBtnBgColor
@@ -170,15 +173,31 @@ class ZLInputTextViewController: UIViewController {
         self.view.addSubview(self.collectionView)
         
         ZLDrawColorCell.zl_register(self.collectionView)
+        self.view.addGestureRecognizer(tap)
+        tap.delegate = self
     }
     
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
+             shouldRequireFailureOf otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        
+       if gestureRecognizer == self.tap &&
+            otherGestureRecognizer == self.collectionView.panGestureRecognizer {
+           self.tap.isEnabled = false
+          return true
+       }
+        self.tap.isEnabled = true
+       return false
+    }
+        
     @objc func cancelBtnClick() {
+        self.tap.isEnabled = true
         self.endInput?(self.textView.text,
                        self.currentTextColor.toHexString(), nil)
         self.dismiss(animated: true, completion: nil)
     }
     
     @objc func doneBtnClick() {
+        self.tap.isEnabled = true
         self.endInput?(self.textView.text,
                        self.currentTextColor.toHexString(),
                        nil)
@@ -242,10 +261,10 @@ extension ZLInputTextViewController: UICollectionViewDelegate,
 extension ZLInputTextViewController: UITextViewDelegate {
     
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
-        if text == "\n" {
-            self.doneBtnClick()
-            return false
-        }
+//        if text == "\n" {
+//            self.doneBtnClick()
+//            return false
+//        }
         textView.sizeToFit()
         return true
     }

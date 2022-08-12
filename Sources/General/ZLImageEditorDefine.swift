@@ -32,6 +32,8 @@ struct ZLImageEditorLayout {
     
     static let bottomToolTitleFont = UIFont.systemFont(ofSize: 17)
     
+    static let textFont = UIFont(name: "FFShamelFamily-UniqueMedium", size: 30) ?? UIFont.systemFont(ofSize: 17)
+
     static let bottomToolBtnCornerRadius: CGFloat = 5
     
 }

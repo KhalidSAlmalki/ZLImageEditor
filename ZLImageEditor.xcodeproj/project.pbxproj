@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		D24C0FF2283418BB0082B1F7 /* UIScreen+safe area.swift in Sources */ = {isa = PBXBuildFile; fileRef = D24C0FF1283418BB0082B1F7 /* UIScreen+safe area.swift */; };
+		D2BBB31928A6A7B500457416 /* FFShamelFamily-UniqueMedium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D2BBB31828A6A7B500457416 /* FFShamelFamily-UniqueMedium.ttf */; };
 		D2DA134227F87EDB00B358DD /* Color+String.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2DA134127F87EDB00B358DD /* Color+String.swift */; };
 		D2DA134527F87FB800B358DD /* ZLEditImageModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2DA134427F87FB800B358DD /* ZLEditImageModel.swift */; };
 		E40208DC256B9BA60077F5DC /* ZLImageEditor.h in Headers */ = {isa = PBXBuildFile; fileRef = E40208DA256B9BA60077F5DC /* ZLImageEditor.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -36,6 +37,7 @@
 
 /* Begin PBXFileReference section */
 		D24C0FF1283418BB0082B1F7 /* UIScreen+safe area.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIScreen+safe area.swift"; sourceTree = "<group>"; };
+		D2BBB31828A6A7B500457416 /* FFShamelFamily-UniqueMedium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "FFShamelFamily-UniqueMedium.ttf"; path = "../../Example/Example/FFShamelFamily-UniqueMedium.ttf"; sourceTree = "<group>"; };
 		D2DA134127F87EDB00B358DD /* Color+String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+String.swift"; sourceTree = "<group>"; };
 		D2DA134427F87FB800B358DD /* ZLEditImageModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZLEditImageModel.swift; sourceTree = "<group>"; };
 		E40208D7256B9BA60077F5DC /* ZLImageEditor.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ZLImageEditor.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -75,6 +77,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		D2BBB31728A6A78200457416 /* zlFont */ = {
+			isa = PBXGroup;
+			children = (
+				D2BBB31828A6A7B500457416 /* FFShamelFamily-UniqueMedium.ttf */,
+			);
+			path = zlFont;
+			sourceTree = "<group>";
+		};
 		D2DA134327F87FAF00B358DD /* Models */ = {
 			isa = PBXGroup;
 			children = (
@@ -102,6 +112,7 @@
 		E40208D9256B9BA60077F5DC /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				D2BBB31728A6A78200457416 /* zlFont */,
 				E40208DA256B9BA60077F5DC /* ZLImageEditor.h */,
 				E4020904256BA0390077F5DC /* ZLImageEditor.bundle */,
 				E4020902256BA00D0077F5DC /* General */,
@@ -217,6 +228,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D2BBB31928A6A7B500457416 /* FFShamelFamily-UniqueMedium.ttf in Resources */,
 				E4020905256BA0390077F5DC /* ZLImageEditor.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
