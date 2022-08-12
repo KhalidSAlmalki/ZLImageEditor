@@ -26,16 +26,24 @@
 
 import UIKit
 
-struct ZLImageEditorLayout {
-    
-    static let bottomToolBtnH: CGFloat = 34
-    
-    static let bottomToolTitleFont = UIFont.systemFont(ofSize: 17)
-    
-    static let textFont = UIFont(name: "FFShamelFamily-UniqueMedium", size: 30) ?? UIFont.systemFont(ofSize: 17)
+public protocol ZLImageEditorFont {
+     var bottomToolTitleFont: UIFont { get }
+     var textFont: UIFont { get }
+}
 
-    static let bottomToolBtnCornerRadius: CGFloat = 5
+extension ZLImageEditorFont {
+     var bottomToolTitleFont: UIFont {
+        return UIFont.systemFont(ofSize: 17)
+    }
     
+    var textFont: UIFont {
+        return UIFont(name: "FFShamelFamily-UniqueMedium", size: 30) ?? UIFont.systemFont(ofSize: 17)
+    }
+}
+
+struct ZLImageEditorLayout {
+    static let bottomToolBtnH: CGFloat = 34
+    static let bottomToolBtnCornerRadius: CGFloat = 5
 }
 
 func zlRGB(_ red: CGFloat, _ green: CGFloat, _ blue: CGFloat) -> UIColor {

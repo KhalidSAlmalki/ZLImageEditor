@@ -251,7 +251,8 @@ class ZLClipImageViewController: UIViewController {
         let toolBtnH: CGFloat = 25
         let toolBtnY = (ZLClipImageViewController.bottomToolViewH - toolBtnH) / 2 - 10
         self.cancelBtn.frame = CGRect(x: 30, y: toolBtnY, width: toolBtnH, height: toolBtnH)
-        let revertBtnW = localLanguageTextValue(.revert).boundingRect(font: ZLImageEditorLayout.bottomToolTitleFont, limitSize: CGSize(width: CGFloat.greatestFiniteMagnitude, height: toolBtnH)).width + 20
+        
+        let revertBtnW = localLanguageTextValue(.revert).boundingRect(font: ZLImageEditorConfiguration.default().zlImageEditorFont.bottomToolTitleFont, limitSize: CGSize(width: CGFloat.greatestFiniteMagnitude, height: toolBtnH)).width + 20
         self.revertBtn.frame = CGRect(x: (self.view.bounds.width-revertBtnW)/2, y: toolBtnY, width: revertBtnW, height: toolBtnH)
         self.doneBtn.frame = CGRect(x: self.view.bounds.width-30-toolBtnH, y: toolBtnY, width: toolBtnH, height: toolBtnH)
         
@@ -324,7 +325,7 @@ class ZLClipImageViewController: UIViewController {
         self.revertBtn.setTitleColor(.white, for: .normal)
         self.revertBtn.setTitle(localLanguageTextValue(.revert), for: .normal)
         self.revertBtn.zl_enlargeValidTouchArea(inset: 20)
-        self.revertBtn.titleLabel?.font = ZLImageEditorLayout.bottomToolTitleFont
+        self.revertBtn.titleLabel?.font = ZLImageEditorConfiguration.default().zlImageEditorFont.bottomToolTitleFont
         self.revertBtn.addTarget(self, action: #selector(revertBtnClick), for: .touchUpInside)
         self.bottomToolView.addSubview(self.revertBtn)
         

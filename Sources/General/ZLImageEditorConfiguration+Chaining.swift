@@ -144,4 +144,10 @@ extension ZLImageEditorConfiguration {
         return self
     }
     
+    @discardableResult
+    public func setFontStyle(_ fonts: ZLImageEditorFont) -> ZLImageEditorConfiguration {
+        zlImageEditorFont = fonts
+        return self
+    }
+    
 }

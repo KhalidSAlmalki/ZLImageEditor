@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D2BBB31B28A6AB7D00457416 /* FFShamelFamily-UniqueMedium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D2BBB31A28A6AB6800457416 /* FFShamelFamily-UniqueMedium.ttf */; };
 		E4020928256BA9D70077F5DC /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4020927256BA9D70077F5DC /* AppDelegate.swift */; };
 		E402092C256BA9D70077F5DC /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E402092B256BA9D70077F5DC /* ViewController.swift */; };
 		E402092F256BA9D70077F5DC /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E402092D256BA9D70077F5DC /* Main.storyboard */; };
@@ -71,7 +70,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		D2BBB31A28A6AB6800457416 /* FFShamelFamily-UniqueMedium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "FFShamelFamily-UniqueMedium.ttf"; sourceTree = "<group>"; };
 		E4020924256BA9D70077F5DC /* Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E4020927256BA9D70077F5DC /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E402092B256BA9D70077F5DC /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -163,7 +161,6 @@
 				E4020930256BA9D90077F5DC /* Assets.xcassets */,
 				E4020932256BA9D90077F5DC /* LaunchScreen.storyboard */,
 				E4020935256BA9D90077F5DC /* Info.plist */,
-				D2BBB31A28A6AB6800457416 /* FFShamelFamily-UniqueMedium.ttf */,
 			);
 			path = Example;
 			sourceTree = "<group>";
@@ -279,7 +276,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D2BBB31B28A6AB7D00457416 /* FFShamelFamily-UniqueMedium.ttf in Resources */,
 				E4020934256BA9D90077F5DC /* LaunchScreen.storyboard in Resources */,
 				E4020931256BA9D90077F5DC /* Assets.xcassets in Resources */,
 				E402092F256BA9D70077F5DC /* Main.storyboard in Resources */,

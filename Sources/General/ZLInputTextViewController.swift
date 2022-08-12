@@ -104,10 +104,10 @@ class ZLInputTextViewController: UIViewController,
     
         
         let btnY = UIScreen.main.heightOfSafeArea()
-        let cancelBtnW = localLanguageTextValue(.cancel).boundingRect(font: ZLImageEditorLayout.bottomToolTitleFont, limitSize: CGSize(width: .greatestFiniteMagnitude, height: ZLImageEditorLayout.bottomToolBtnH)).width + 20
+        let cancelBtnW = localLanguageTextValue(.cancel).boundingRect(font: ZLImageEditorConfiguration.default().zlImageEditorFont.bottomToolTitleFont, limitSize: CGSize(width: .greatestFiniteMagnitude, height: ZLImageEditorLayout.bottomToolBtnH)).width + 20
         self.cancelBtn.frame = CGRect(x: 30, y: btnY, width: cancelBtnW, height: ZLImageEditorLayout.bottomToolBtnH)
         
-        let doneBtnW = localLanguageTextValue(.done).boundingRect(font: ZLImageEditorLayout.bottomToolTitleFont, limitSize: CGSize(width: .greatestFiniteMagnitude, height: ZLImageEditorLayout.bottomToolBtnH)).width + 20
+        let doneBtnW = localLanguageTextValue(.done).boundingRect(font: ZLImageEditorConfiguration.default().zlImageEditorFont.bottomToolTitleFont, limitSize: CGSize(width: .greatestFiniteMagnitude, height: ZLImageEditorLayout.bottomToolBtnH)).width + 20
         self.doneBtn.frame = CGRect(x: view.bounds.width - 30 - doneBtnW, y: btnY, width: doneBtnW, height: ZLImageEditorLayout.bottomToolBtnH)
         
         self.textView.frame = CGRect(x: 20,
@@ -137,14 +137,14 @@ class ZLInputTextViewController: UIViewController,
         
         self.cancelBtn = UIButton(type: .custom)
         self.cancelBtn.setTitle(localLanguageTextValue(.cancel), for: .normal)
-        self.cancelBtn.titleLabel?.font = ZLImageEditorLayout.bottomToolTitleFont
+        self.cancelBtn.titleLabel?.font = ZLImageEditorConfiguration.default().zlImageEditorFont.bottomToolTitleFont
         self.cancelBtn.addTarget(self, action: #selector(cancelBtnClick), for: .touchUpInside)
         view.addSubview(self.cancelBtn)
         self.cancelBtn.isHidden = true
 
         self.doneBtn = UIButton(type: .custom)
         self.doneBtn.setTitle(localLanguageTextValue(.done), for: .normal)
-        self.doneBtn.titleLabel?.font = ZLImageEditorLayout.bottomToolTitleFont
+        self.doneBtn.titleLabel?.font = ZLImageEditorConfiguration.default().zlImageEditorFont.bottomToolTitleFont
         self.doneBtn.addTarget(self, action: #selector(doneBtnClick), for: .touchUpInside)
         view.addSubview(self.doneBtn)
         self.textView = UITextView(frame: .zero)
@@ -156,7 +156,7 @@ class ZLInputTextViewController: UIViewController,
         self.textView.textColor = self.currentTextColor
         self.textView.tintColor = self.currentTextColor
         self.textView.text = self.text
-        self.textView.font = UIFont.boldSystemFont(ofSize: ZLTextStickerView.fontSize)
+        self.textView.font = ZLImageEditorConfiguration.default().zlImageEditorFont.textFont
         view.addSubview(self.textView)
         
         let layout = UICollectionViewFlowLayout()

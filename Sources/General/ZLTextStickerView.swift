@@ -159,7 +159,7 @@ class ZLTextStickerView: UIView,
         
         self.label = UILabel()
         self.label.text = text
-        self.label.font = UIFont.boldSystemFont(ofSize: ZLTextStickerView.fontSize)
+        self.label.font = ZLImageEditorConfiguration.default().zlImageEditorFont.textFont
         self.label.textColor = textColor.colorWithHexString()
         self.label.backgroundColor = bgColor?.colorWithHexString() ?? .clear
         self.label.numberOfLines = 0

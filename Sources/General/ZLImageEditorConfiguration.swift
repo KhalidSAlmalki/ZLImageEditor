@@ -225,6 +225,8 @@ public class ZLImageEditorConfiguration: NSObject {
     /// The background color of edit done button.
     @objc public var editDoneBtnBgColor: UIColor = zlRGB(80, 169, 56)
     
+    public var zlImageEditorFont: ZLImageEditorFont = FontSize()
+    
 }
 
 extension ZLImageEditorConfiguration {
@@ -379,3 +381,5 @@ public class ImageStickerData: NSObject {
                             _ onComplete: @escaping(([UIColor]) -> Void ))
 
 }
+
+struct FontSize: ZLImageEditorFont {}
