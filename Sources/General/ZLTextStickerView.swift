@@ -35,9 +35,7 @@ protocol ZLTextStickerViewDelegate: ZLStickerViewDelegate {
 class ZLTextStickerView: UIView,
                          ZLStickerViewAdditional {
 
-    static let edgeInset: CGFloat = 20
-    
-    static let fontSize: CGFloat = 30
+    static let edgeInset: CGFloat = 0
     
     static let borderWidth = 1 / UIScreen.main.scale
     
@@ -151,6 +149,7 @@ class ZLTextStickerView: UIView,
         
         self.borderView = UIView()
         self.borderView.layer.borderWidth = ZLTextStickerView.borderWidth
+        self.borderView.layer.cornerRadius = 4
         self.hideBorder()
         if showBorder {
             self.startTimer()
@@ -163,7 +162,6 @@ class ZLTextStickerView: UIView,
         self.label.textColor = textColor.colorWithHexString()
         self.label.backgroundColor = bgColor?.colorWithHexString() ?? .clear
         self.label.numberOfLines = 0
-        self.label.lineBreakMode = .byCharWrapping
         self.borderView.addSubview(self.label)
         
         self.tapGes = UITapGestureRecognizer(target: self, action: #selector(tapAction(_:)))
@@ -307,7 +305,7 @@ class ZLTextStickerView: UIView,
         if isOn, !self.onOperation {
             self.onOperation = true
             self.cleanTimer()
-            self.borderView.layer.borderColor = UIColor.clear.cgColor
+            self.borderView.layer.borderColor = UIColor.black.withAlphaComponent(0.4).cgColor
             self.superview?.bringSubviewToFront(self)
             self.delegate?.stickerBeginOperation(self)
         } else if !isOn, self.onOperation {
@@ -450,7 +448,7 @@ class ZLTextStickerView: UIView,
     
     class func calculateSize(text: String, width: CGFloat) -> CGSize {
         let diff = ZLTextStickerView.edgeInset * 2
-        let size = text.boundingRect(font: UIFont.boldSystemFont(ofSize: ZLTextStickerView.fontSize), limitSize: CGSize(width: width - diff, height: CGFloat.greatestFiniteMagnitude))
+        let size = text.boundingRect(font: ZLImageEditorConfiguration.default().zlImageEditorFont.textFont, limitSize: CGSize(width: width - diff, height: CGFloat.greatestFiniteMagnitude))
         return CGSize(width: size.width + diff * 2, height: size.height + diff * 2)
     }
     

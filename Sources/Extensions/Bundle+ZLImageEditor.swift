@@ -136,6 +136,8 @@ extension Bundle {
                 language = "it"
             } else if language.hasPrefix("id") {
                 language = "id"
+            } else if language.hasPrefix("ar") {
+                language = "ar"
             } else {
                 language = "en"
             }

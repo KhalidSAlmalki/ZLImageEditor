@@ -521,14 +521,14 @@ public class ZLEditImageViewController: UIViewController {
         self.topShadowView.layer.addSublayer(self.topShadowLayer)
         
         self.cancelBtn = UIButton(type: .custom)
-        self.cancelBtn.setTitle("Cancel", for: .normal)
+        self.cancelBtn.setTitle(localLanguageTextValue(.cancel), for: .normal)
         self.cancelBtn.addTarget(self, action: #selector(cancelBtnClick), for: .touchUpInside)
         self.cancelBtn.adjustsImageWhenHighlighted = false
         self.cancelBtn.zl_enlargeValidTouchArea(inset: 30)
         self.topShadowView.addSubview(self.cancelBtn)
         
         self.doneBtn = UIButton(type: .custom)
-        self.doneBtn.setTitle("Save", for: .normal)
+        self.doneBtn.setTitle(localLanguageTextValue(.save), for: .normal)
         self.doneBtn.addTarget(self, action: #selector(doneBtnClick), for: .touchUpInside)
         self.doneBtn.zl_enlargeValidTouchArea(inset: 30)
         self.topShadowView.addSubview(self.doneBtn)
