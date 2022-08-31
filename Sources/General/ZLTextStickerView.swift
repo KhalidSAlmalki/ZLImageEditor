@@ -104,7 +104,8 @@ class ZLTextStickerView: UIView,
                                   originFrame: self.originFrame,
                                   gesScale: self.gesScale,
                                   gesRotation: self.gesRotation,
-                                  totalTranslationPoint: self.totalTranslationPoint)
+                                  totalTranslationPoint: self.totalTranslationPoint,
+                                  sortOrder: tag)
     }
     
     deinit {
@@ -157,6 +158,7 @@ class ZLTextStickerView: UIView,
         self.addSubview(self.borderView)
         
         self.label = UILabel()
+        self.label.textAlignment = .center
         self.label.text = text
         self.label.font = ZLImageEditorConfiguration.default().zlImageEditorFont.textFont
         self.label.textColor = textColor.colorWithHexString()
@@ -470,10 +472,11 @@ public class ZLTextStickerState: Codable {
     let bgColor: String?
     let originScale: CGFloat
     let originAngle: CGFloat
-    let originFrame: CGRect
+    var originFrame: CGRect
     let gesScale: CGFloat
     let gesRotation: CGFloat
     let totalTranslationPoint: CGPoint
+    let sortOrder: Int?
     
     public init(text: String,
          textColor: String,
@@ -483,7 +486,8 @@ public class ZLTextStickerState: Codable {
          originFrame: CGRect,
          gesScale: CGFloat,
          gesRotation: CGFloat,
-         totalTranslationPoint: CGPoint) {
+         totalTranslationPoint: CGPoint,
+         sortOrder: Int?) {
         self.text = text
         self.textColor = textColor
         self.bgColor = bgColor
@@ -493,5 +497,6 @@ public class ZLTextStickerState: Codable {
         self.gesScale = gesScale
         self.gesRotation = gesRotation
         self.totalTranslationPoint = totalTranslationPoint
+        self.sortOrder = sortOrder
     }
 }

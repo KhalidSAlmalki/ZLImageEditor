@@ -38,6 +38,8 @@ public class ZLEditImageViewController: UIViewController {
     
     static let ashbinNormalBgColor = zlRGB(40, 40, 40).withAlphaComponent(0.8)
     
+    var activityView: UIActivityIndicatorView?
+
     var animateDismiss = true
     
     var originalImage: UIImage
@@ -223,7 +225,6 @@ public class ZLEditImageViewController: UIViewController {
     
     @objc public init(image: UIImage,
                editModel: ZLEditImageModel? = nil) {
-        
         originalImage = editModel?.customBackgroundImage ?? .init()
         editImage = originalImage
         editImageWithoutAdjust = originalImage
@@ -249,16 +250,15 @@ public class ZLEditImageViewController: UIViewController {
         selectedAdjustTool = adjustTools.first
         
         super.init(nibName: nil, bundle: nil)
-        
         if !self.drawColors.contains(self.currentDrawColor) {
             self.currentDrawColor = self.drawColors.first!
         }
-        
+
    //     self.currentBackgroundColor = self.backgroundColors.first!
         setStyleForImageBorder()
 
-        let teStic = editModel?.textStickers ?? []
-        let imStic = editModel?.imageStickers ?? []
+        let teStic = (editModel?.textStickers ?? []).sorted(by: { $0.sortOrder ?? 0 < $1.sortOrder ?? 1             })
+        let imStic = (editModel?.imageStickers ?? []).sorted(by: { $0.sortOrder ?? 0 < $1.sortOrder ?? 1})
         
         var stickers: [UIView?] = []
         
@@ -269,14 +269,35 @@ public class ZLEditImageViewController: UIViewController {
         
         imStic.forEach { (cache) in
             self.addTolodaingImageQueue(cache.imageName)
-            ZLImageEditorConfiguration.default().imageStickerContainerView?.getImage(imageName: cache.imageName, { data in
-                let v = ZLImageStickerView(from: cache, imageStickerData: data)
+            let v = ZLImageStickerView(from: cache, imageStickerData: .init(image: .init(), name: cache.imageName))
                 stickers.append(v)
-                self.stickers = stickers.compactMap { $0 }
+            self.stickers = stickers.compactMap { $0 }
+
+            DispatchQueue.main.async {
+                self.showActivityIndicator()
                 self.setupStickers()
+            }
+            
+            ZLImageEditorConfiguration.default().imageStickerContainerView?.getImage(imageName: cache.imageName, { data in
+                if let index = self.stickers.firstIndex(where: { ($0 as? ZLImageStickerView)?.image.name == data.name}) {
+                    if let state = (self.stickers[index] as? ZLImageStickerView)?.state {
+                        self.stickers[index] = ZLImageStickerView(from: state, imageStickerData: data)
+                    }
+                } else {
+                    debugPrint("--did not find it---")
+                }
                 self.removeTolodaingImageQueue(data.name)
             })
+            
+         
         }
+        
+
+        DispatchQueue.main.async {
+            self.setupStickers()
+        }
+   
+
         
     }
     
@@ -295,6 +316,8 @@ public class ZLEditImageViewController: UIViewController {
     
     func sendDidFinshSetupIfNeeded() {
         if self.lodaingImageQueue.isEmpty {
+            self.hideActivityIndicator()
+            self.setupStickers()
             self.didFinishSetupBlock?(UIImage(view: self.containerView)!)
         }
     }
@@ -408,6 +431,9 @@ public class ZLEditImageViewController: UIViewController {
     }
     
     func resetContainerViewFrame() {
+        guard self.scrollView != nil else {
+            return
+        }
         self.scrollView.setZoomScale(1, animated: true)
         self.imageView.image = self.editImage
         self.imageView.contentMode = .scaleAspectFill
@@ -450,13 +476,15 @@ public class ZLEditImageViewController: UIViewController {
     
     fileprivate func setupStickers() {
         resetContainerViewFrame()
+        self.stickersContainer?.subviews.forEach({ $0.removeFromSuperview() })
         self.stickers.forEach { (view) in
             self.stickersContainer.addSubview(view)
             if let tv = view as? ZLTextStickerView {
                 tv.frame = tv.originFrame
+                self.configTextSticker(tv)
                 tv.frame.size = ZLTextStickerView.calculateSize(text: tv.label.text ?? "",
                                                                 width: self.view.frame.width)
-                self.configTextSticker(tv)
+
             } else if let iv = view as? ZLImageStickerView {
                 iv.frame = iv.originFrame
                 self.configImageSticker(iv)
@@ -464,10 +492,23 @@ public class ZLEditImageViewController: UIViewController {
         }
         
         self.stickersContainer.subviews.forEach { (view) in
-            if view is ZLTextStickerView {
-                (view as? ZLTextStickerView)?.bringToFront()
+            
+            if let tv = view as? ZLTextStickerView {
+                let size = ZLTextStickerView.calculateSize(text: tv.label.text ?? "",
+                                                           width: self.view.frame.width)
+                var frame = tv.frame
+                    frame.size = size
+                    tv.originFrame = frame
+                
+                tv.changeSize(to: size)
+                tv.frame.origin.x = frame.minX
+                tv.frame.origin.y = frame.minY
+
+                tv.bringToFront()
             }
         }
+        
+        
     }
     
     func setupUI() {
@@ -880,11 +921,14 @@ public class ZLEditImageViewController: UIViewController {
     @objc public func doneBtnClick() {
         var textStickers: [ZLTextStickerState] = []
         var imageStickers: [ZLImageStickerState] = []
-        
-        for  view in stickersContainer.subviews {
+        for  (index, view) in stickersContainer.subviews.enumerated() {
             if let ts = view as? ZLTextStickerView, let _ = ts.label.text {
-                textStickers.append(ts.state)
+                ts.tag = index
+                let ts_ = ts.state
+                ts_.originFrame = view.frame
+                textStickers.append(ts_)
             } else if let ts = view as? ZLImageStickerView {
+                ts.tag = index
                 imageStickers.append(ts.state)
             }
         }
@@ -1293,7 +1337,10 @@ public class ZLEditImageViewController: UIViewController {
     }
 
     func configColors() {
+        stickersContainer.isHidden = true
         editImage = buildImage()
+        stickersContainer.isHidden = false
+
         ZLImageEditorConfiguration.default().colorsDataSource?.getTextColors(editImage: editImage, { colors in
             ZLImageEditorConfiguration.default().textStickerTextColors = colors
         })
@@ -1723,6 +1770,29 @@ extension ZLEditImageViewController: ZLTextStickerViewDelegate {
                 let newSize = ZLTextStickerView.calculateSize(text: text, width: self.view.frame.width)
                 textSticker.changeSize(to: newSize)
             }
+        }
+    }
+    
+    func showActivityIndicator() {
+        self.view.viewWithTag(5)?.removeFromSuperview()
+        self.stickersContainer.isHidden = true
+        self.imageView.isHidden = true
+        
+        activityView = UIActivityIndicatorView(style: .large)
+        activityView?.center = self.view.center
+        activityView?.hidesWhenStopped = true
+        activityView?.tag = 5
+        self.view.addSubview(activityView!)
+        activityView?.startAnimating()
+    }
+
+    func hideActivityIndicator(){
+        self.stickersContainer.isHidden = false
+        self.imageView.isHidden = false
+
+        self.view.viewWithTag(5)?.removeFromSuperview()
+        if (activityView != nil){
+            activityView?.stopAnimating()
         }
     }
     

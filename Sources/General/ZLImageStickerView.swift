@@ -76,7 +76,7 @@ class ZLImageStickerView: UIView, ZLStickerViewAdditional {
     
     var originTransform: CGAffineTransform = .identity
     
-    let image: ImageStickerData
+    var image: ImageStickerData
     
     var pinchGes: UIPinchGestureRecognizer!
     
@@ -106,7 +106,8 @@ class ZLImageStickerView: UIView, ZLStickerViewAdditional {
                                    originFrame: self.originFrame,
                                    gesScale: self.gesScale,
                                    gesRotation: self.gesRotation,
-                                   totalTranslationPoint: self.totalTranslationPoint)
+                                   totalTranslationPoint: self.totalTranslationPoint,
+                                   sortOrder: tag)
     }
     
     deinit {
@@ -406,6 +407,16 @@ class ZLImageStickerView: UIView, ZLStickerViewAdditional {
         return size
     }
     
+    func bringToFront() {
+        self.superview?.bringSubviewToFront(self)
+    }
+    
+    func refresh() {
+        self.imageView = UIImageView(image: image.image)
+        self.imageView.contentMode = .scaleAspectFit
+        self.imageView.clipsToBounds = true
+        self.layoutIfNeeded()
+    }
 }
 
 
@@ -427,7 +438,8 @@ public class ZLImageStickerState: NSObject,
     let gesScale: CGFloat
     let gesRotation: CGFloat
     let totalTranslationPoint: CGPoint
-    
+    var sortOrder: Int?
+
     enum CodingKeys: String, CodingKey {
         case originScale
         case originAngle
@@ -436,6 +448,7 @@ public class ZLImageStickerState: NSObject,
         case gesRotation
         case totalTranslationPoint
         case imageName
+        case sortOrder
     }
     
     public init(imageName: String,
@@ -444,7 +457,8 @@ public class ZLImageStickerState: NSObject,
          originFrame: CGRect,
          gesScale: CGFloat,
          gesRotation: CGFloat,
-         totalTranslationPoint: CGPoint) {
+                totalTranslationPoint: CGPoint,
+                sortOrder: Int?) {
         self.imageName = imageName
         self.originScale = originScale
         self.originAngle = originAngle
@@ -452,6 +466,8 @@ public class ZLImageStickerState: NSObject,
         self.gesScale = gesScale
         self.gesRotation = gesRotation
         self.totalTranslationPoint = totalTranslationPoint
+        self.sortOrder = sortOrder
+        
         super.init()
     }
     
