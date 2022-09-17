@@ -225,6 +225,7 @@ public class ZLEditImageViewController: UIViewController {
     
     @objc public init(image: UIImage,
                editModel: ZLEditImageModel? = nil) {
+        backgroundImage = editModel?.customBackgroundImage
         originalImage = editModel?.customBackgroundImage ?? .init()
         editImage = originalImage
         editImageWithoutAdjust = originalImage
@@ -239,7 +240,6 @@ public class ZLEditImageViewController: UIViewController {
         saturation = editModel?.saturation ?? 0
         selectRatio = editModel?.selectRatio
         
-        backgroundImage = editModel?.customBackgroundImage
         
         var ts = ZLImageEditorConfiguration.default().tools
         if ts.contains(.imageSticker), ZLImageEditorConfiguration.default().imageStickerContainerView == nil {
@@ -267,6 +267,8 @@ public class ZLEditImageViewController: UIViewController {
             stickers.append(v)
         }
         
+        self.stickers = stickers.compactMap { $0 }
+
         imStic.forEach { (cache) in
             self.addTolodaingImageQueue(cache.imageName)
             let v = ZLImageStickerView(from: cache, imageStickerData: .init(image: .init(), name: cache.imageName))
@@ -277,11 +279,15 @@ public class ZLEditImageViewController: UIViewController {
                 self.showActivityIndicator()
                 self.setupStickers()
             }
-            
+            if  ZLImageEditorConfiguration.default().imageStickerContainerView == nil {
+                print("")
+            }
             ZLImageEditorConfiguration.default().imageStickerContainerView?.getImage(imageName: cache.imageName, { data in
                 if let index = self.stickers.firstIndex(where: { ($0 as? ZLImageStickerView)?.image.name == data.name}) {
                     if let state = (self.stickers[index] as? ZLImageStickerView)?.state {
                         self.stickers[index] = ZLImageStickerView(from: state, imageStickerData: data)
+                    } else {
+                        debugPrint("--did not find it---")
                     }
                 } else {
                     debugPrint("--did not find it---")
@@ -318,7 +324,8 @@ public class ZLEditImageViewController: UIViewController {
         if self.lodaingImageQueue.isEmpty {
             self.hideActivityIndicator()
             self.setupStickers()
-            self.didFinishSetupBlock?(UIImage(view: self.containerView)!)
+            self.configColors()
+            self.didFinishSetupBlock?(UIImage(view: self.containerView) ?? .init())
         }
     }
     
@@ -481,33 +488,24 @@ public class ZLEditImageViewController: UIViewController {
             self.stickersContainer.addSubview(view)
             if let tv = view as? ZLTextStickerView {
                 tv.frame = tv.originFrame
+                let newSize = ZLTextStickerView.calculateSize(text: tv.label.text ?? "",
+                                                              width: self.view.frame.width)
+                tv.changeSize(to: newSize)
                 self.configTextSticker(tv)
-                tv.frame.size = ZLTextStickerView.calculateSize(text: tv.label.text ?? "",
-                                                                width: self.view.frame.width)
-
+             
             } else if let iv = view as? ZLImageStickerView {
                 iv.frame = iv.originFrame
+                
                 self.configImageSticker(iv)
             }
         }
-        
+    
         self.stickersContainer.subviews.forEach { (view) in
             
             if let tv = view as? ZLTextStickerView {
-                let size = ZLTextStickerView.calculateSize(text: tv.label.text ?? "",
-                                                           width: self.view.frame.width)
-                var frame = tv.frame
-                    frame.size = size
-                    tv.originFrame = frame
-                
-                tv.changeSize(to: size)
-                tv.frame.origin.x = frame.minX
-                tv.frame.origin.y = frame.minY
-
                 tv.bringToFront()
             }
         }
-        
         
     }
     
@@ -924,15 +922,16 @@ public class ZLEditImageViewController: UIViewController {
         for  (index, view) in stickersContainer.subviews.enumerated() {
             if let ts = view as? ZLTextStickerView, let _ = ts.label.text {
                 ts.tag = index
+                ts.originFrame = view.frame
                 let ts_ = ts.state
-                ts_.originFrame = view.frame
                 textStickers.append(ts_)
             } else if let ts = view as? ZLImageStickerView {
                 ts.tag = index
+              //  ts.originFrame = view.frame
                 imageStickers.append(ts.state)
             }
         }
-        
+       
         if drawPaths.isEmpty,
            editRect.size == backgroundimageSize,
             angle == 0, mosaicPaths.isEmpty,
@@ -1341,11 +1340,11 @@ public class ZLEditImageViewController: UIViewController {
         editImage = buildImage()
         stickersContainer.isHidden = false
 
-        ZLImageEditorConfiguration.default().colorsDataSource?.getTextColors(editImage: editImage, { colors in
+        ZLImageEditorConfiguration.default().colorsDataSource?.getTextColors(editImage: buildImage(), { colors in
             ZLImageEditorConfiguration.default().textStickerTextColors = colors
         })
         
-        ZLImageEditorConfiguration.default().colorsDataSource?.getBackgroundColors(editImage: editImage, { colors in
+        ZLImageEditorConfiguration.default().colorsDataSource?.getBackgroundColors(editImage: buildImage(), { colors in
             ZLImageEditorConfiguration.default().imageBackgroundColors = colors
             self.backgroundColors = colors
         })
