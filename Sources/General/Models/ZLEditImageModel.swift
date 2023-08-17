@@ -30,6 +30,8 @@ public class ZLEditImageModel: NSObject {
     public let imageStickers: [ZLImageStickerState]?
     
     public var customBackgroundImage: UIImage?
+    
+    public var allowCustomColor: Bool = false
 
     public init(
         drawPaths: [ZLDrawPath],

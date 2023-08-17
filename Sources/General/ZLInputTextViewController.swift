@@ -27,7 +27,7 @@
 import UIKit
 
 class ZLInputTextViewController: UIViewController,
-                                 UIGestureRecognizerDelegate {
+                                 UIGestureRecognizerDelegate, UIColorPickerViewControllerDelegate {
 
     static let collectionViewHeight: CGFloat = 50
     
@@ -45,6 +45,9 @@ class ZLInputTextViewController: UIViewController,
     
     var currentTextColor: UIColor
     
+    
+    var allowCustomColor: Bool
+
     /// text, textColor, bgColor
     var endInput: ( (String, String, String?) -> Void )?
     
@@ -61,7 +64,10 @@ class ZLInputTextViewController: UIViewController,
     init(image: UIImage?,
          text: String? = nil,
          textColor: String? = nil,
-         bgColor: String? = nil) {
+         bgColor: String? = nil,
+         allowCustomColor: Bool) {
+        
+        self.allowCustomColor = allowCustomColor
         
         self.image = image
         self.text = text ?? ""
@@ -240,6 +246,10 @@ extension ZLInputTextViewController: UICollectionViewDelegate,
         self.textView.tintColor =  self.currentTextColor
         collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
         collectionView.reloadData()
+        
+        if indexPath.item == 0 && allowCustomColor {
+            presentColorPicker()
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
@@ -252,6 +262,17 @@ extension ZLInputTextViewController: UICollectionViewDelegate,
             return UIEdgeInsets(top: 0, left: leftInset, bottom: 0, right: rightInset)
         }
         return UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
+    }
+    
+    
+    func presentColorPicker() {
+        // Initializing Color Picker
+        if #available(iOS 14.0, *) {
+            let picker = UIColorPickerViewController()
+            picker.selectedColor = currentTextColor
+            picker.delegate = self
+            self.present(picker, animated: true, completion: nil)
+        }
     }
     
     
@@ -269,4 +290,24 @@ extension ZLInputTextViewController: UITextViewDelegate {
         return true
     }
     
+}
+
+@available(iOS 14.0, *)
+extension ZLInputTextViewController: UIColorPickerViewControllerDelegate {
+    
+    func colorPickerViewControllerDidFinish(_ viewController: UIColorPickerViewController) {
+        ZLImageEditorConfiguration.default().textStickerTextColors[0] = viewController.selectedColor
+        collectionView.reloadData()
+        self.currentTextColor = viewController.selectedColor
+        self.textView.textColor = self.currentTextColor
+        self.textView.tintColor =  self.currentTextColor
+    }
+    
+    func colorPickerViewControllerDidSelectColor(_ viewController: UIColorPickerViewController) {
+        ZLImageEditorConfiguration.default().textStickerTextColors[0] = viewController.selectedColor
+        collectionView.reloadData()
+        self.currentTextColor = viewController.selectedColor
+        self.textView.textColor = self.currentTextColor
+        self.textView.tintColor =  self.currentTextColor
+    }
 }

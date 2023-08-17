@@ -170,6 +170,8 @@ public class ZLEditImageViewController: UIViewController {
     
     var lodaingImageQueue: [String] = []
     
+    var allowCustomColor: Bool = false
+    
     @objc public var editFinishBlock: ( (UIImage, ZLEditImageModel) -> Void )?
     
     @objc public var didFinishSetupBlock: ( (UIImage) -> Void )?
@@ -207,6 +209,7 @@ public class ZLEditImageViewController: UIViewController {
                                          textStickers: nil,
                                          imageStickers: nil,
                                          customBackgroundImage: nil)
+                m.allowCustomColor = editModel?.allowCustomColor ?? false
                 completion?(image.clipImage(angle, editRect) ?? image, m)
             }
             vc.animateDismiss = animate
@@ -230,7 +233,7 @@ public class ZLEditImageViewController: UIViewController {
         editImage = originalImage
         editImageWithoutAdjust = originalImage
         drawColors = ZLImageEditorConfiguration.default().drawColors
-
+        allowCustomColor = editModel?.allowCustomColor ?? false
         currentFilter = editModel?.selectFilter ?? .normal
         drawPaths = editModel?.drawPaths ?? []
         mosaicPaths = editModel?.mosaicPaths ?? []
@@ -1133,7 +1136,8 @@ public class ZLEditImageViewController: UIViewController {
         let vc = ZLInputTextViewController(image: nil,
                                            text: text,
                                            textColor: textColor,
-                                           bgColor: bgColor)
+                                           bgColor: bgColor,
+                                           allowCustomColor: self.allowCustomColor)
         
         vc.endInput = { [weak self] (text, textColor, bgColor)  in
             completion(text, textColor, bgColor)
