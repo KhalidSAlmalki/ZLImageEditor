@@ -36,39 +36,31 @@ extension String {
 
 extension UIColor {
     func toHexString() -> String {
-        return String(format: "#%06x", toHex())
-    }
-    
-    func toHex() -> UInt32 {
-        let rgba = toRGBAComponents()
-        
-        return roundToHex(rgba.r) << 16 | roundToHex(rgba.g) << 8 | roundToHex(rgba.b)
-    }
-    
-    final func toRGBAComponents() -> (r: CGFloat, g: CGFloat, b: CGFloat, a: CGFloat) {
-        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
-        
-#if os(iOS) || os(tvOS) || os(watchOS)
-        getRed(&r, green: &g, blue: &b, alpha: &a)
-        
-        return (r, g, b, a)
-#elseif os(OSX)
-        guard let rgbaColor = self.usingColorSpace(.deviceRGB) else {
-            fatalError("Could not convert color to RGBA.")
-        }
-        
-        rgbaColor.getRed(&r, green: &g, blue: &b, alpha: &a)
-        
-        return (r, g, b, a)
-#endif
-    }
+        cgColor.toHex() ?? ""
+      }
 }
 
-func roundToHex(_ x: CGFloat) -> UInt32 {
-    guard x > 0 else { return 0 }
-    let rounded: CGFloat = round(x * 255.0)
-    
-    return UInt32(rounded)
+extension CGColor {
+    func toHex() -> String? {
+        guard let components = components else { return nil }
+        
+        if components.count == 2 {
+            let value = components[0]
+            let alpha = components[1]
+            return String(format: "#%02lX%02lX%02lX%02lX", lroundf(Float(alpha*255)), lroundf(Float(value*255)), lroundf(Float(value*255)), lroundf(Float(value*255)))
+        }
+        
+        guard components.count == 4 else { return nil }
+        
+        let red   = components[0]
+        let green = components[1]
+        let blue  = components[2]
+        let alpa  = components[3]
+        
+        let hexString = String(format: "#%02lX%02lX%02lX%02lX",lroundf(Float(alpa*255)), lroundf(Float(red*255)), lroundf(Float(green*255)), lroundf(Float(blue*255)))
+        
+        return hexString
+    }
 }
 
 extension Collection {
